@@ -9,7 +9,12 @@
  *
  */
 
+#ifdef __APPLE__
 #include <OPENGL/gl.h>
+#include <OPENGL/glu.h>
+#else
+#include <GL/gl.h>
+#include <GL/glu.h>
 
 /*
  * Defining polygons
