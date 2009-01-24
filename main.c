@@ -8,6 +8,7 @@
 
 
 #include <GLUT/glut.h>         /* glut.h includes gl.h and glu.h*/
+#include <cstdlib>
 #include "myFunctions.h"
 
 int screenHeight = 500;
