@@ -10,18 +10,18 @@
 
 using namespace std;
 
-Matrix::Matrix() : _rows(4), _cols(4) {
-	_data = new double[4*4];
+Matrix::Matrix() : _rows(4), _cols(4), _size(16) {
+	_data = new double[16];
 }
 
 Matrix::Matrix(int rows,int cols) :
-		_rows(rows), _cols(cols) {
-	_data = new double[_rows*_cols];
+		_rows(rows), _cols(cols), _size(rows*cols) {
+	_data = new double[_size];
 }
 
 double& Matrix::operator() (int row, int col) {
 	int loc = _cols*row+col;
-	assert(loc<_cols*_rows);
+	assert(loc<_size);
 	return _data[loc];
 }
 
@@ -38,7 +38,7 @@ ostream& operator<<(ostream& os, const Matrix &m) {
 			
 double	Matrix::operator() (int row, int col) const {
 	int loc = _cols*row+col;
-	assert(loc<_cols*_rows);
+	assert(loc<_size);
 	return _data[loc];
 }
 
@@ -47,18 +47,22 @@ Matrix::~Matrix() {
 }
 
 Matrix::Matrix(const Matrix& m) {
-	int size = m.getRows() * m.getCols();
-	_data = new double[size];
-	for(int i=0;i<size;i++) {
+	_rows = m._rows;
+	_cols = m._cols;
+	_size = m._size;
+	_data = new double[_size];
+	for(int i=0;i<_size;i++) {
 		_data[i] = m._data[i];
 	}
 }
 
 Matrix& Matrix::operator= (const Matrix& m) {
 	delete [] _data;
-	int size = m.getRows() * m.getCols();
-	_data = new double[size];
-	for(int i=0;i<size;i++) {
+	_rows = _rows;
+	_cols = _cols;
+	_size = m._size;
+	_data = new double[_size];
+	for(int i=0;i<_size;i++) {
 		_data[i] = m._data[i];
 	}
 	return *this;

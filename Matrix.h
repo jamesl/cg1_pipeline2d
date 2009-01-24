@@ -20,8 +20,8 @@ class Matrix {
 	int getCols() const { return _cols; }
 
   private:
+	int _rows,_cols,_size;
 	double *_data;
-	int _rows,_cols;
 };
 
 ostream& operator<<(ostream& os, const Matrix &m);
