@@ -12,13 +12,14 @@
  *
  */
 
-#include "Matrix.h"
 #include <iostream>
 #include <cassert>
 #include <stack>
 #include <vector>
 #include <cmath>
 
+#include "Matrix.h"
+#include "color.h"
 #include "myFunctions.h"
 
 using namespace std;
@@ -29,9 +30,11 @@ Matrix *currentmatrix;
 
 stack<Matrix> matrixstack;
 vector<Matrix> vertices;
+GLenum vertexmode;
 
-struct {
-	int x1,y1,x2,y2;
+struct window{
+	//Matrix a(4,1),b(4,1);
+	double x1,y1,x2,y2;
 } clip,viewport;
 
 
@@ -56,7 +59,7 @@ struct {
  *  For your implementation, only GL_POLYGON need be considered
  */
 void myBegin(GLenum mode) {
-	glBegin(mode);
+	vertexmode = mode;
 	vertices.clear();
 }
 
@@ -70,7 +73,6 @@ void myBegin(GLenum mode) {
 void myEnd()
 {
 	// draw
-	glEnd();
 	for(vector<Matrix>::iterator iter = vertices.begin();
 	    iter != vertices.end();
 	    iter++) {
@@ -87,7 +89,6 @@ void myEnd()
  */
 void myVertex2f(float x, float y)
 {
-	glVertex2f (x, y);
 	Matrix pt(4,1);
 	pt(0,0) = x;
 	pt(1,0) = y;
@@ -108,6 +109,7 @@ void myColor3f(	float  	red,
 				float  	blue)
 {
 	glColor3f( red, green, blue);
+	setcolor(red,green,blue);
 }
 
 
@@ -125,6 +127,7 @@ void myClearColor(	float  	red,
 					float  	alpha)
 {
 	glClearColor (red, green, blue, alpha);
+	setclearcolor(red,green,blue);
 }
 
 

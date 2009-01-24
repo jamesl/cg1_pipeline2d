@@ -7,7 +7,7 @@ typedef struct {
 
 color getcolor();
 color getclearcolor();
-void setcurrentcolor(float,float,float);
+void setcolor(float,float,float);
 void setclearcolor(float,float,float);
 
 void setPixel(int,int);

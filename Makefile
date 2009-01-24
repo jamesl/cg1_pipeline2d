@@ -8,9 +8,9 @@ LDFLAGS=-framework GLUT -framework OpenGL
 
 all: main
 
-main: myFunctions.o Matrix.o
+main: myFunctions.o Matrix.o color.o setPixel.o
 
-myFunctions.o: drawPolygon.o Matrix.o
+myFunctions.o: drawPolygon.o Matrix.o color.o
 
 color.o: setPixel.o
 
