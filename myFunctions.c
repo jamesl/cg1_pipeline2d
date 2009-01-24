@@ -17,6 +17,7 @@
 #include <cassert>
 #include <stack>
 #include <vector>
+#include <cmath>
 
 #include "myFunctions.h"
 
@@ -27,6 +28,11 @@ Matrix projection;
 Matrix *currentmatrix;
 
 stack<Matrix> matrixstack;
+vector<Matrix> vertices;
+
+struct {
+	int x1,y1,x2,y2;
+} clip,viewport;
 
 
 /**
@@ -49,9 +55,9 @@ stack<Matrix> matrixstack;
  *
  *  For your implementation, only GL_POLYGON need be considered
  */
-void myBegin(GLenum mode)
-{
+void myBegin(GLenum mode) {
 	glBegin(mode);
+	vertices.clear();
 }
 
 
@@ -63,7 +69,14 @@ void myBegin(GLenum mode)
  */
 void myEnd()
 {
+	// draw
 	glEnd();
+	for(vector<Matrix>::iterator iter = vertices.begin();
+	    iter != vertices.end();
+	    iter++) {
+		(*iter) = (*iter) * modelview;
+	}
+	// draw based on mode now
 }
 
 
@@ -75,6 +88,12 @@ void myEnd()
 void myVertex2f(float x, float y)
 {
 	glVertex2f (x, y);
+	Matrix pt(4,1);
+	pt(0,0) = x;
+	pt(1,0) = y;
+	pt(2,0) = 0.0;
+	pt(3,0) = 1.0;
+	vertices.push_back(pt);
 }
 
 
@@ -177,10 +196,18 @@ void myLoadIdentity( void)
  * For this implementation, it is assumed that the current matrix is the 
  * transformation (MODELVIEW) matrix.
  */
-void myTranslatef(float x, float y)
-{
-	myMatrixMode (GL_MODELVIEW);
+void myTranslatef(float x, float y) {
+	myMatrixMode(GL_MODELVIEW);
+}
+
+void myTranslatef(float x, float y) {
 	Matrix translate();
+	translate(0,0) = translate(1,1) = 1.0;
+	translate(2,2) = translate(3,3) = 1.0;
+	translate(0,3) = x;
+	translate(1,3) = y;
+	translate(2,3) = 1.0;
+	(*currentmatrix) = (*currentmatrix) * translate;
 }
 
 
@@ -194,10 +221,17 @@ void myTranslatef(float x, float y)
  * For this implementation, it is assumed that the current matrix is the 
  * transformation (MODELVIEW) matrix.
  */
-void myRotatef(	float angle)
-{
+void myRotatef(float angle) {
 	myMatrixMode (GL_MODELVIEW);
-	applyRotateMatrixf (angle, 0.0, 0.0, 1.0);
+	myRotatefx(angle);
+}
+void myRotatefx(float angle) {
+	Matrix rotate;
+	rotate(2,2) = rotate(3,3) = 1.0;
+	rotate(0,0) = rotate(1,1) = cos(angle);
+	rotate(0,1) = -sin(angle);
+	rotate(1,0) = sin(angle);
+	(*currentmatrix) = (*currentmatrix) * rotate;
 }
 
 
@@ -211,10 +245,16 @@ void myRotatef(	float angle)
  * transformation (MODELVIEW) matrix.
  *
  */
-void myScalef(float x, float y)
-{
-	myMatrixMode (GL_MODELVIEW);
-	applyScaleMatrixf (x, y, 1.0);
+void myScalef(float x, float y) {
+	myMatrixMode(GL_MODELVIEW);
+	myScalefx(x,y);
+}
+void myScalefx(float x, float y) {
+	Matrix scale;
+	scale(0,0) = x;
+	scale(1,1) = y;
+	scale(2,2) = scale(3,3) = 1.0;
+	(*currentmatrix) = (*currentmatrix) * scale;
 }
 
 /**
@@ -228,9 +268,13 @@ void myScalef(float x, float y)
  */
 void myOrtho2D(	double left, double right, double bottom, double top)
 {
-	glMatrixMode( GL_PROJECTION );
-    glLoadIdentity( );
-	gluOrtho2D (left, right, bottom, top);
+	myMatrixMode( GL_PROJECTION );
+    	myLoadIdentityCurrent();
+	//gluOrtho2D (left, right, bottom, top);
+	clip.x1 = left;
+	clip.y1 = bottom;
+	clip.x2 = right;
+	clip.y2 = top;
 }
 
 
@@ -243,5 +287,14 @@ void myOrtho2D(	double left, double right, double bottom, double top)
  */
 void myViewport(int x, int y, int width, int height)
 {
-	glViewport (x, y, width, height);
+	//glViewport (x, y, width, height);
+	viewport.x1 = x;
+	viewport.x2 = x + width;
+	viewport.y1 = y;	
+	viewport.y2 = y + height;
+
+	myTranslate2f(clip.x1,clip.y1);
+	myScale2f((clip.x2-clip.x1)/(viewport.x2-viewport.x1),
+		  (clip.y2-clip.y1)/(viewport.x2-viewport.x1));
+	myTranslate2f(-viewport.x1,-viewport.y1)
 }
