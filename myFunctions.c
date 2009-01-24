@@ -12,7 +12,22 @@
  *
  */
 
+#include "Matrix.h"
+#include <iostream>
+#include <cassert>
+#include <stack>
+#include <vector>
+
 #include "myFunctions.h"
+
+using namespace std;
+
+Matrix modelview;
+Matrix projection;
+Matrix *currentmatrix;
+
+stack<Matrix> matrixstack;
+
 
 /**
  *  myBegin - delimit the vertices of a primitive or a group of like primitives.
@@ -111,6 +126,35 @@ void myClear(GLbitfield mask)
 	glClear (mask);
 }
 
+void myMatrixMode(int mode) {
+	switch(mode) {
+	case GL_PROJECTION:
+		currentmatrix = &projection;
+		break;
+	case GL_MODELVIEW:
+		currentmatrix = &modelview;
+		break;
+	}
+}
+
+void myPushMatrix() {
+	assert(currentmatrix != 0);
+	matrixstack.push(*currentmatrix);
+}
+
+void myPopMatrix() {
+	assert(matrixstack.size());
+	assert(currentmatrix != 0);
+	*currentmatrix = matrixstack.top();
+	matrixstack.pop();
+}
+
+void myLoadIdentityCurrent() {
+	assert(currentmatrix != 0);
+	for(int c=0;c<4;c++)
+		(*currentmatrix)(c,c) = 1.0;
+}
+
 /**
  * myLoadIdentity — replace the current matrix with the identity matrix.
  *
@@ -120,9 +164,7 @@ void myClear(GLbitfield mask)
 void myLoadIdentity( void)
 {
 	myMatrixMode (GL_MODELVIEW);
-	myLoadIdentityCurrent ();
-	glMatrixMode (GL_MODELVIEW);
-	glLoadIdentity ();
+	myLoadIdentityCurrent();
 }
 
 
@@ -137,8 +179,8 @@ void myLoadIdentity( void)
  */
 void myTranslatef(float x, float y)
 {
-	glMatrixMode (GL_MODELVIEW);
-	glTranslatef (x, y, 0.0);
+	myMatrixMode (GL_MODELVIEW);
+	Matrix translate();
 }
 
 
@@ -154,8 +196,8 @@ void myTranslatef(float x, float y)
  */
 void myRotatef(	float angle)
 {
-	glMatrixMode (GL_MODELVIEW);
-	glRotatef (angle, 0.0, 0.0, 1.0);
+	myMatrixMode (GL_MODELVIEW);
+	applyRotateMatrixf (angle, 0.0, 0.0, 1.0);
 }
 
 
@@ -171,8 +213,8 @@ void myRotatef(	float angle)
  */
 void myScalef(float x, float y)
 {
-	glMatrixMode (GL_MODELVIEW);
-	glScalef (x, y, 1.0);
+	myMatrixMode (GL_MODELVIEW);
+	applyScaleMatrixf (x, y, 1.0);
 }
 
 /**

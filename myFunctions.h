@@ -15,8 +15,6 @@
 #include <GL/glut.h>
 #endif
 
-#include "myPipeline.h"
-
 /*
  * Defining polygons
  */
@@ -47,8 +45,11 @@ extern void myOrtho2D(	double left, double right, double bottom, double top);
 extern void myViewport(int x, int y, int width, int height);
 
 
+void myMatrixMode(GLenum mode);
 
+void myPushMatrix();
 
+void myPopMatrix();
 
-
-
+void myLoadIdentityCurrent();
+	
