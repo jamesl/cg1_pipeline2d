@@ -1,7 +1,6 @@
 
 #define SCR_HEIGHT 300
 #define SCR_WIDTH 300
-#include <stdio.h>
 #include <cassert>
 #include <vector>
 #include <algorithm>
@@ -39,7 +38,7 @@ bool cmpbucketptr(Bucket *a, Bucket *b) {
 }
 	
 // draw a polygon!
-void drawPolygon( int n, int x[], int y[] ) {
+void drawPolygon( int n, vector<int> x, vector<int> y ) {
 	Bucket *edgetable[SCR_HEIGHT];
 	for(int i=0;i<SCR_HEIGHT;i++) 
 		edgetable[i] = 0; 
