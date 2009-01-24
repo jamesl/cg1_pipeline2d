@@ -196,12 +196,8 @@ void myLoadIdentity( void)
  * For this implementation, it is assumed that the current matrix is the 
  * transformation (MODELVIEW) matrix.
  */
-void myTranslatef(float x, float y) {
-	myMatrixMode(GL_MODELVIEW);
-}
-
-void myTranslatef(float x, float y) {
-	Matrix translate();
+void myTranslatefx(float x, float y) {
+	Matrix translate;
 	translate(0,0) = translate(1,1) = 1.0;
 	translate(2,2) = translate(3,3) = 1.0;
 	translate(0,3) = x;
@@ -209,6 +205,11 @@ void myTranslatef(float x, float y) {
 	translate(2,3) = 1.0;
 	(*currentmatrix) = (*currentmatrix) * translate;
 }
+void myTranslatef(float x, float y) {
+	myMatrixMode(GL_MODELVIEW);
+	myTranslatefx(x,y);
+}
+
 
 
 
@@ -221,10 +222,6 @@ void myTranslatef(float x, float y) {
  * For this implementation, it is assumed that the current matrix is the 
  * transformation (MODELVIEW) matrix.
  */
-void myRotatef(float angle) {
-	myMatrixMode (GL_MODELVIEW);
-	myRotatefx(angle);
-}
 void myRotatefx(float angle) {
 	Matrix rotate;
 	rotate(2,2) = rotate(3,3) = 1.0;
@@ -232,6 +229,10 @@ void myRotatefx(float angle) {
 	rotate(0,1) = -sin(angle);
 	rotate(1,0) = sin(angle);
 	(*currentmatrix) = (*currentmatrix) * rotate;
+}
+void myRotatef(float angle) {
+	myMatrixMode (GL_MODELVIEW);
+	myRotatefx(angle);
 }
 
 
@@ -245,16 +246,16 @@ void myRotatefx(float angle) {
  * transformation (MODELVIEW) matrix.
  *
  */
-void myScalef(float x, float y) {
-	myMatrixMode(GL_MODELVIEW);
-	myScalefx(x,y);
-}
 void myScalefx(float x, float y) {
 	Matrix scale;
 	scale(0,0) = x;
 	scale(1,1) = y;
 	scale(2,2) = scale(3,3) = 1.0;
 	(*currentmatrix) = (*currentmatrix) * scale;
+}
+void myScalef(float x, float y) {
+	myMatrixMode(GL_MODELVIEW);
+	myScalefx(x,y);
 }
 
 /**
@@ -293,8 +294,8 @@ void myViewport(int x, int y, int width, int height)
 	viewport.y1 = y;	
 	viewport.y2 = y + height;
 
-	myTranslate2f(clip.x1,clip.y1);
-	myScale2f((clip.x2-clip.x1)/(viewport.x2-viewport.x1),
+	myTranslatef(clip.x1,clip.y1);
+	myScalef((clip.x2-clip.x1)/(viewport.x2-viewport.x1),
 		  (clip.y2-clip.y1)/(viewport.x2-viewport.x1));
-	myTranslate2f(-viewport.x1,-viewport.y1)
+	myTranslatef(-viewport.x1,-viewport.y1);
 }
