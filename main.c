@@ -6,8 +6,11 @@
  *
  */
 
-
+#ifdef __APPLE__
 #include <GLUT/glut.h>         /* glut.h includes gl.h and glu.h*/
+#else
+#include <GL/glut.h>
+#endif
 #include <cstdlib>
 #include "myFunctions.h"
 

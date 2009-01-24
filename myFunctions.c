@@ -61,6 +61,7 @@ struct window{
 void myBegin(GLenum mode) {
 	vertexmode = mode;
 	vertices.clear();
+	cout << vertices.size() << endl;
 }
 
 
@@ -73,11 +74,6 @@ void myBegin(GLenum mode) {
 void myEnd()
 {
 	// draw
-	for(vector<Matrix>::iterator iter = vertices.begin();
-	    iter != vertices.end();
-	    iter++) {
-		(*iter) = (*iter) * modelview;
-	}
 	// draw based on mode now
 }
 
@@ -94,7 +90,9 @@ void myVertex2f(float x, float y)
 	pt(1,0) = y;
 	pt(2,0) = 0.0;
 	pt(3,0) = 1.0;
+	if(vertices.size()>=4) return;
 	vertices.push_back(pt);
+	cout << vertices.size() << endl;
 }
 
 

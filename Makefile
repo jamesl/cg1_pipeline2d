@@ -4,7 +4,7 @@ CC = g++
 
 CFLAGS=-ggdb
 
-LDFLAGS=-framework GLUT -framework OpenGL
+LDFLAGS=-lglut -lGL -lm
 
 all: main
 
