@@ -8,7 +8,7 @@ LDFLAGS=-framework GLUT -framework OpenGL
 
 all: main
 
-main: myFunctions.o
+main: myFunctions.o myPipeline.o Matrix.o
 
 clean:
 	rm -f main *.o

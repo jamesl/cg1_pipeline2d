@@ -37,21 +37,8 @@ void myPopMatrix() {
 	matrixstack.pop();
 }
 
-void myLoadIdentity() {
+void myLoadIdentityCurrent() {
 	assert(currentmatrix != 0);
 	for(int c=0;c<4;c++)
 		(*currentmatrix)(c,c) = 1.0;
-}
-	
-
-int main(void) {
-	myMatrixMode(GL_PROJECTION);
-	Matrix id;
-	for(int c=0;c<16;c++)
-		modelview(c%4,c/4) = ((double)c)/5.0;
-	for(int c=0;c<4;c++)
-		id(c,c) = 1.0;
-	cout << id << endl;
-	cout << modelview << endl;
-	cout << modelview*modelview << endl;
 }

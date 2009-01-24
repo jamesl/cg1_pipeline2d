@@ -119,6 +119,8 @@ void myClear(GLbitfield mask)
  */
 void myLoadIdentity( void)
 {
+	myMatrixMode (GL_MODELVIEW);
+	myLoadIdentityCurrent ();
 	glMatrixMode (GL_MODELVIEW);
 	glLoadIdentity ();
 }

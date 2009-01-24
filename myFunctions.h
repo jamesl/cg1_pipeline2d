@@ -15,6 +15,8 @@
 #include <GL/glut.h>
 #endif
 
+#include "myPipeline.h"
+
 /*
  * Defining polygons
  */
