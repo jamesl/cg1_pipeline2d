@@ -23,6 +23,8 @@
 #include "myFunctions.h"
 
 void drawPolygon(vector<Matrix>);
+void clipPolygon (int in, int inx[], int iny[], int *out, int outx[],
+		  int outy[], int x0, int y0, int x1, int y1);
 
 using namespace std;
 
@@ -91,6 +93,7 @@ void myVertex2f(float x, float y)
 	pt(1,0) = y;
 	pt(2,0) = 0.0;
 	pt(3,0) = 1.0;
+	pt = modelview * pt;
 	vertices.push_back(pt);
 }
 
