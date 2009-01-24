@@ -70,7 +70,7 @@ void drawPolygon(vector<Matrix> vertex) {
 			// current bucket is first in table
 			Bucket *curbucket = edgetable[y0];
 			// that if statement passed so this should...
-			assert(curbucket!=0 && edge!=0);
+			assert(curbucket!=0);
 			if(curbucket->x > edge->x) {
 				// add this bucket first
 				edgetable[y0] = edge;
