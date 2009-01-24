@@ -4,6 +4,8 @@
 #include <cassert>
 #include <vector>
 #include <algorithm>
+#include "Matrix.h"
+#include "color.h"
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
 #else
@@ -11,8 +13,6 @@
 #endif
 
 using namespace std;
-
-void setPixel(int,int);
 
 // the same buckets as in class
 class Bucket {
@@ -38,17 +38,17 @@ bool cmpbucketptr(Bucket *a, Bucket *b) {
 }
 	
 // draw a polygon!
-void drawPolygon( int n, vector<int> x, vector<int> y ) {
+void drawPolygon( int n, vector<Matrix> vertex) {
 	Bucket *edgetable[SCR_HEIGHT];
 	for(int i=0;i<SCR_HEIGHT;i++) 
 		edgetable[i] = 0; 
 	// fill ET
 	int y0,y1,x0,x1;
 	for(int i=0;i<n;i++) {
-		y0 = y[i];
-		y1 = y[(i+1)%n];
-		x0 = x[i];
-		x1 = x[(i+1)%n];
+		y0 = vertex[i](1,0);
+		y1 = vertex[(i+1)%n](1,0);
+		x0 = vertex[i](0,0);
+		x1 = vertex[(i+1)%n](0,0);
 		assert(y0<SCR_HEIGHT);
 		if(y1 < y0) { // swap points
 			int swap;	

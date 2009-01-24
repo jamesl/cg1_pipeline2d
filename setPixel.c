@@ -12,7 +12,7 @@
  *
  */
 
-#include <OPENGL/gl.h>
+#include <OpenGL/gl.h>
 
 void setPixel (int x, int y, float r, float g, float b)
 {
