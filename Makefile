@@ -8,7 +8,7 @@ LDFLAGS=-lglut -lGL -lm
 
 all: main
 
-main: myFunctions.o Matrix.o color.o setPixel.o
+main: myFunctions.o Matrix.o color.o setPixel.o drawPolygon.o
 
 myFunctions.o: drawPolygon.o Matrix.o color.o
 

@@ -22,6 +22,8 @@
 #include "color.h"
 #include "myFunctions.h"
 
+void drawPolygon(vector<Matrix>);
+
 using namespace std;
 
 Matrix modelview;
@@ -72,8 +74,8 @@ void myBegin(GLenum mode) {
  */
 void myEnd()
 {
-	// draw
 	// draw based on mode now
+	drawPolygon(vertices);
 }
 
 

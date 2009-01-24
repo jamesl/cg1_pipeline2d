@@ -38,7 +38,8 @@ bool cmpbucketptr(Bucket *a, Bucket *b) {
 }
 	
 // draw a polygon!
-void drawPolygon( int n, vector<Matrix> vertex) {
+void drawPolygon(vector<Matrix> vertex) {
+	int n = vertex.size();
 	Bucket *edgetable[SCR_HEIGHT];
 	for(int i=0;i<SCR_HEIGHT;i++) 
 		edgetable[i] = 0; 
