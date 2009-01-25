@@ -22,14 +22,15 @@
 #include "color.h"
 #include "myFunctions.h"
 
+#define NORMALIZE_MATRIX GL_PROJECTION+5
 void drawPolygon(vector<Matrix>);
-void clipPolygon (int in, int inx[], int iny[], int *out, int outx[],
-		  int outy[], int x0, int y0, int x1, int y1);
+vector<Matrix> clipPolygon(vector<Matrix>);
 
 using namespace std;
 
 Matrix modelview;
 Matrix projection;
+Matrix normalize;
 Matrix *currentmatrix;
 
 stack<Matrix> matrixstack;
@@ -75,8 +76,10 @@ void myBegin(GLenum mode) {
  * This routine will initiate the processing and drawing of a polygon.
  */
 void myEnd()
-{
-	// draw based on mode now
+{	
+	vector<Matrix> normalized_vertices 
+		= (normalize * modelview) * vertices;
+	clipPolygon(normalized_vertices);
 	drawPolygon(vertices);
 }
 
@@ -93,7 +96,7 @@ void myVertex2f(float x, float y)
 	pt(1,0) = y;
 	pt(2,0) = 0.0;
 	pt(3,0) = 1.0;
-	pt = projection * modelview * pt;
+	pt = modelview * pt;
 	vertices.push_back(pt);
 }
 
@@ -155,6 +158,9 @@ void myMatrixMode(int mode) {
 		break;
 	case GL_MODELVIEW:
 		currentmatrix = &modelview;
+		break;
+	case NORMALIZE_MATRIX:
+		currentmatrix = &normalize;
 		break;
 	}
 }
@@ -274,11 +280,16 @@ void myOrtho2D(	double left, double right, double bottom, double top)
 {
 	myMatrixMode( GL_PROJECTION );
     	myLoadIdentityCurrent();
+	myMatrixMode(NORMALIZE_MATRIX);
+	myLoadIdentityCurrent();
 	//gluOrtho2D (left, right, bottom, top);
 	clip.x1 = left;
 	clip.y1 = bottom;
 	clip.x2 = right;
 	clip.y2 = top;
+	myTranslatefx(-left,-bottom);
+	myScalefx(2*(right-left),2*(top-bottom));
+	myTranslatefx(-1,-1);
 }
 
 
@@ -298,8 +309,8 @@ void myViewport(int x, int y, int width, int height)
 	viewport.y1 = y;	
 	viewport.y2 = y + height;
 
-	myTranslatefx(clip.x1,clip.y1);
-	myScalefx((clip.x2-clip.x1)/(viewport.x2-viewport.x1),
-		  (clip.y2-clip.y1)/(viewport.x2-viewport.x1));
-	myTranslatefx(-viewport.x1,-viewport.y1);
+	myTranslatefx(1,1);
+	myScalefx(2/(viewport.x2-viewport.x1),
+		  2/(viewport.x2-viewport.x1));
+	myTranslatefx(viewport.x1,viewport.y1);
 }

@@ -68,6 +68,15 @@ Matrix& Matrix::operator= (const Matrix& m) {
 	return *this;
 }
 
+vector<Matrix>  Matrix::operator* (const vector<Matrix>& v) {
+	vector<Matrix>::const_iterator iter;	
+	vector<Matrix> w;
+	for(iter=v.begin();iter != v.end();iter++) {
+		w.push_back((*this) * (*iter));
+	}
+	return w;
+}
+
 Matrix  Matrix::operator* (const Matrix& m) {
 	assert(_cols == m.getRows());
 	Matrix result(_rows,m._cols);

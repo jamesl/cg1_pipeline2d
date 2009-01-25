@@ -1,4 +1,7 @@
-// Polygon Clipping (against a rectangle)
+// Polygon Clipping (normalized)
+
+#include <vector>
+#include "Matrix.h"
 
 // Point class stores coordinates
 // and has methods for the Sutherland-Hodgeman
@@ -8,25 +11,34 @@ class Point {
 	int x,y;
 
 	Point(int _x, int _y) : x(_x), y(_y) { }
+	Point(Matrix a) : x(a(0,0)), y(a(1,0)) { }
+
+	Matrix matrix() {
+		Matrix m(4,1);	
+		m(0,0) = x;
+		m(1,0) = y;
+		m(2,0) = 1;
+		m(3,0) = 1;
+	}
 
 	// check if a point is within clip region
-	bool inside(int clip, Point ll, Point ur) {
+	bool inside(int clip) {
 		switch(clip) {
 			case 0: // right
-				return x < ur.x;
+				return x < 1;
 			case 1: // top
-				return y < ur.x;
+				return y < 1;
 			case 2: // bottom
-				return y > ll.y;
+				return y > -1;
 			case 3: // left
-				return x > ll.x;
+				return x > -1;
 		}
 	}
 
 	// move this point into the clip region. this point is
 	// outside the clip region, and point r is within the clip
 	// region. 
-	Point moveIn(Point r,int clip, Point ll, Point ur) {
+	Point moveIn(Point r,int clip) {
 		Point q(x,y);
 		bool vert = (x == r.x);
 		float m;
@@ -36,26 +48,26 @@ class Point {
 		switch(clip) {
 			// move in x
 			case 0: // right
-				q.x = ur.x;
-				q.y = r.y + (ll.x - r.x) * m;
+				q.x = 1;
+				q.y = r.y + (-1 - r.x) * m;
 				return q;
 			case 3: // left
-				q.x = ll.x;
-				q.y = r.y + (ur.x - r.x) * m;
+				q.x = -1;
+				q.y = r.y + (1 - r.x) * m;
 			// move in y
 			case 1: // top
-				q.y = ur.y;
+				q.y = 1;
 				if(vert) 
 					q.x = r.x;
 				else
-					q.x = r.x + (ur.y - r.y)/m;
+					q.x = r.x + (1 - r.y)/m;
 				return q;
 			case 2: // bottom
-				q.y = ll.y;
+				q.y = -1;
 				if(vert) 
 					q.x = r.x;
 				else
-					q.x = r.x + (ll.y - r.y)/m;
+					q.x = r.x + (-1 - r.y)/m;
 				return q;
 		}
 	}
@@ -71,35 +83,27 @@ class Point {
  * and upper right corner (x1, y1).  The resulting vertices are places in
  * outx, and outy with the vertex count places in out.
  */
-void clipPolygon (int in, int inx[], int iny[], int *out, int outx[],
-		  int outy[], int x0, int y0, int x1, int y1)
-{
+void clipPolygon (vector<Matrix> inv) {
   /* provide your implementation here */
-	Point S(inx[in-1],iny[in-1]);
-	Point P(0,0);
-	Point ll(x0,y0);
-	Point ur(x1,y1);
-	
-	*out=0;
+	int in = inv.size();
+	vector<Matrix> outv;
+	Point S(inv[in-1]);
 	
 	for(int clip=0;clip<4;clip++) {
 	for(int i=0;i<in;i++) {
-		P.x = inx[i]; P.y = iny[i];
-		if(P.inside(clip,ll,ur)) { // right edge
-			if(!(S.inside(clip,ll,ur))) { 
+		Point P(inv[i]);
+		if(P.inside(clip)) { // right edge
+			if(!(S.inside(clip))) { 
 				// compute intersection S, P
-				Point Q = S.moveIn(P,clip,ll,ur);
-				outx[*out] = Q.x; outy[*out] = Q.y;   
-				*out++;
+				Point Q = S.moveIn(P,clip);
+				outv.push_back(Q.matrix());
 			}
 			// output P
-			outx[*out] = P.x; outy[*out] = P.y;   
-			*out++;
-		} else if(S.inside(clip,ll,ur)) {
+			outv.push_back(P.matrix());
+		} else if(S.inside(clip)) {
 			// compute intersection P, S
-			Point Q = P.moveIn(S,clip,ll,ur);
-			outx[*out] = Q.x; outy[*out] = Q.y;   
-			*out++;
+			Point Q = P.moveIn(S,clip);
+			outv.push_back(Q.matrix());
 		}
 		S = P;
 	}
