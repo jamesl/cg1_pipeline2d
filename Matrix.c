@@ -12,10 +12,12 @@ using namespace std;
 
 Matrix::Matrix() : _rows(4), _cols(4), _size(16) {
 	_data = new double[16];
+	assert(_size<=16);
 }
 
 Matrix::Matrix(int rows,int cols) :
 		_rows(rows), _cols(cols), _size(rows*cols) {
+	assert(_size<=16);
 	_data = new double[_size];
 }
 
@@ -23,6 +25,7 @@ double& Matrix::operator() (int row, int col) {
 	int loc = _cols*row+col;
 	assert(loc<_size);
 	return _data[loc];
+	assert(_size<=16);
 }
 
 ostream& operator<<(ostream& os, const Matrix &m) {
@@ -40,6 +43,7 @@ double	Matrix::operator() (int row, int col) const {
 	int loc = _cols*row+col;
 	assert(loc<_size);
 	return _data[loc];
+	assert(_size<=16);
 }
 
 Matrix::~Matrix() {
@@ -54,25 +58,28 @@ Matrix::Matrix(const Matrix& m) {
 	for(int i=0;i<_size;i++) {
 		_data[i] = m._data[i];
 	}
+	assert(_size<=16);
 }
 
 Matrix& Matrix::operator= (const Matrix& m) {
 	delete [] _data;
-	_rows = _rows;
-	_cols = _cols;
+	_rows = m._rows;
+	_cols = m._cols;
 	_size = m._size;
 	_data = new double[_size];
 	for(int i=0;i<_size;i++) {
 		_data[i] = m._data[i];
 	}
+	assert(_size<=16);
 	return *this;
 }
 
 vector<Matrix>  Matrix::operator* (const vector<Matrix>& v) {
 	vector<Matrix>::const_iterator iter;	
 	vector<Matrix> w;
-	for(iter=v.begin();iter != v.end();iter++) {
-		w.push_back((*this) * (*iter));
+	for(int i=0;i<v.size();i++) {
+		cout << v.at(i) << endl;
+		w.push_back((*this) * v.at(i));
 	}
 	return w;
 }
@@ -89,6 +96,7 @@ Matrix  Matrix::operator* (const Matrix& m) {
 			result(i,j) = sum;	
 		}
 	}
+	assert(result._size <= 16);
 	return result;
 }
 

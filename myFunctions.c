@@ -24,7 +24,7 @@
 
 #define NORMALIZE_MATRIX GL_PROJECTION+5
 void drawPolygon(vector<Matrix>);
-vector<Matrix> clipPolygon(vector<Matrix>);
+vector<Matrix> clipPolygon(const vector<Matrix>&);
 
 using namespace std;
 
@@ -77,10 +77,10 @@ void myBegin(GLenum mode) {
  */
 void myEnd()
 {	
-	vector<Matrix> normalized_vertices 
-		= (normalize * modelview) * vertices;
+	vector<Matrix> normalized_vertices((normalize * modelview) * vertices);
+	cout << normalized_vertices.at(0) << endl;
 	clipPolygon(normalized_vertices);
-	drawPolygon(vertices);
+	drawPolygon(normalized_vertices);
 }
 
 

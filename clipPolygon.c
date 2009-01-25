@@ -83,11 +83,12 @@ class Point {
  * and upper right corner (x1, y1).  The resulting vertices are places in
  * outx, and outy with the vertex count places in out.
  */
-void clipPolygon (vector<Matrix> inv) {
+void clipPolygon (const vector<Matrix>& inv) {
   /* provide your implementation here */
-	int in = inv.size();
 	vector<Matrix> outv;
-	Point S(inv[in-1]);
+	int in = (int)inv.size();
+	if(in==0) return;
+	Point S(inv.at(in-1));
 	
 	for(int clip=0;clip<4;clip++) {
 	for(int i=0;i<in;i++) {
