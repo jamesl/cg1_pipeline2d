@@ -93,7 +93,7 @@ void myVertex2f(float x, float y)
 	pt(1,0) = y;
 	pt(2,0) = 0.0;
 	pt(3,0) = 1.0;
-	pt = modelview * pt;
+	pt = projection * modelview * pt;
 	vertices.push_back(pt);
 }
 
@@ -292,13 +292,14 @@ void myOrtho2D(	double left, double right, double bottom, double top)
 void myViewport(int x, int y, int width, int height)
 {
 	//glViewport (x, y, width, height);
+	myMatrixMode(GL_PROJECTION);
 	viewport.x1 = x;
 	viewport.x2 = x + width;
 	viewport.y1 = y;	
 	viewport.y2 = y + height;
 
-	myTranslatef(clip.x1,clip.y1);
-	myScalef((clip.x2-clip.x1)/(viewport.x2-viewport.x1),
+	myTranslatefx(clip.x1,clip.y1);
+	myScalefx((clip.x2-clip.x1)/(viewport.x2-viewport.x1),
 		  (clip.y2-clip.y1)/(viewport.x2-viewport.x1));
-	myTranslatef(-viewport.x1,-viewport.y1);
+	myTranslatefx(-viewport.x1,-viewport.y1);
 }
