@@ -2,6 +2,7 @@
 
 #include <vector>
 #include "Matrix.h"
+#include <cassert>
 
 // Point class stores coordinates
 // and has methods for the Sutherland-Hodgeman
@@ -83,12 +84,14 @@ class Point {
  * and upper right corner (x1, y1).  The resulting vertices are places in
  * outx, and outy with the vertex count places in out.
  */
-void clipPolygon (const vector<Matrix>& inv) {
+void clipPolygon (vector<Matrix> *invp) {
   /* provide your implementation here */
 	vector<Matrix> outv;
-	int in = (int)inv.size();
-	if(in==0) return;
-	Point S(inv.at(in-1));
+	cout << " invp.size: " << (*invp).size() << endl << (*invp)[0] << endl;
+	vector<Matrix> inv(*invp);
+	int in = inv.size();
+	assert(in>0);
+	Point S(inv.at(inv.size()-1));
 	
 	for(int clip=0;clip<4;clip++) {
 	for(int i=0;i<in;i++) {

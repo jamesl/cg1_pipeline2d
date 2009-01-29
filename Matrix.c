@@ -13,12 +13,14 @@ using namespace std;
 Matrix::Matrix() : _rows(4), _cols(4), _size(16) {
 	_data = new double[16];
 	assert(_size<=16);
+	clear();
 }
 
 Matrix::Matrix(int rows,int cols) :
 		_rows(rows), _cols(cols), _size(rows*cols) {
 	assert(_size<=16);
 	_data = new double[_size];
+	clear();
 }
 
 double& Matrix::operator() (int row, int col) {
@@ -27,6 +29,8 @@ double& Matrix::operator() (int row, int col) {
 	return _data[loc];
 	assert(_size<=16);
 }
+
+void Matrix::clear() { for(int i=0;i<_size;i++) _data[i]=0.0; }
 
 ostream& operator<<(ostream& os, const Matrix &m) {
 	for(int i=0;i<m.getRows();i++) {	
@@ -51,6 +55,7 @@ Matrix::~Matrix() {
 }
 
 Matrix::Matrix(const Matrix& m) {
+	assert((&m)!=0);
 	_rows = m._rows;
 	_cols = m._cols;
 	_size = m._size;
@@ -77,9 +82,11 @@ Matrix& Matrix::operator= (const Matrix& m) {
 vector<Matrix>  Matrix::operator* (const vector<Matrix>& v) {
 	vector<Matrix>::const_iterator iter;	
 	vector<Matrix> w;
+	cout << v.size() << endl;
 	for(int i=0;i<v.size();i++) {
-		cout << v.at(i) << endl;
+		cout << v.at(i);
 		w.push_back((*this) * v.at(i));
+		cout << w.at(i) << endl;
 	}
 	return w;
 }

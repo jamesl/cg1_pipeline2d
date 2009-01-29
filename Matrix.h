@@ -20,6 +20,7 @@ class Matrix {
 
 	int getRows() const { return _rows; }
 	int getCols() const { return _cols; }
+	void clear();
 
   private:
 	int _rows,_cols,_size;

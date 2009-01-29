@@ -22,16 +22,14 @@
 #include "color.h"
 #include "myFunctions.h"
 
-#define NORMALIZE_MATRIX GL_PROJECTION+5
 void drawPolygon(vector<Matrix>);
-vector<Matrix> clipPolygon(const vector<Matrix>&);
+vector<Matrix> clipPolygon(vector<Matrix> *);
 
 using namespace std;
 
 Matrix modelview;
 Matrix projection;
-Matrix normalize;
-Matrix *currentmatrix;
+Matrix *currentmatrix = &modelview;
 
 stack<Matrix> matrixstack;
 vector<Matrix> vertices;
@@ -77,10 +75,14 @@ void myBegin(GLenum mode) {
  */
 void myEnd()
 {	
-	vector<Matrix> normalized_vertices((normalize * modelview) * vertices);
-	cout << normalized_vertices.at(0) << endl;
-	clipPolygon(normalized_vertices);
-	drawPolygon(normalized_vertices);
+	
+	if(vertices.size() <= 0) return;
+	cout << "vertices: " << vertices.size();
+	vector<Matrix> v(vertices);
+	vector<Matrix> polygon_vertices = clipPolygon(&v);
+	cout << " polygon_vertices: " << polygon_vertices.size() << endl;
+	if(polygon_vertices.size() > 0)
+		drawPolygon(polygon_vertices);
 }
 
 
@@ -96,7 +98,6 @@ void myVertex2f(float x, float y)
 	pt(1,0) = y;
 	pt(2,0) = 0.0;
 	pt(3,0) = 1.0;
-	pt = modelview * pt;
 	vertices.push_back(pt);
 }
 
@@ -158,9 +159,6 @@ void myMatrixMode(int mode) {
 		break;
 	case GL_MODELVIEW:
 		currentmatrix = &modelview;
-		break;
-	case NORMALIZE_MATRIX:
-		currentmatrix = &normalize;
 		break;
 	}
 }
@@ -278,18 +276,18 @@ void myScalef(float x, float y) {
  */
 void myOrtho2D(	double left, double right, double bottom, double top)
 {
-	myMatrixMode( GL_PROJECTION );
-    	myLoadIdentityCurrent();
-	myMatrixMode(NORMALIZE_MATRIX);
-	myLoadIdentityCurrent();
+	cout << "myOrtho2d" << endl;
+	myLoadIdentity();
 	//gluOrtho2D (left, right, bottom, top);
 	clip.x1 = left;
 	clip.y1 = bottom;
 	clip.x2 = right;
 	clip.y2 = top;
+	myMatrixMode(GL_MODELVIEW);
 	myTranslatefx(-left,-bottom);
 	myScalefx(2*(right-left),2*(top-bottom));
 	myTranslatefx(-1,-1);
+	cout << modelview << endl << endl;
 }
 
 
@@ -303,7 +301,7 @@ void myOrtho2D(	double left, double right, double bottom, double top)
 void myViewport(int x, int y, int width, int height)
 {
 	//glViewport (x, y, width, height);
-	myMatrixMode(GL_PROJECTION);
+	myMatrixMode(GL_MODELVIEW);
 	viewport.x1 = x;
 	viewport.x2 = x + width;
 	viewport.y1 = y;	
