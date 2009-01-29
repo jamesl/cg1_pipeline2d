@@ -20,6 +20,7 @@ class Point {
 		m(1,0) = y;
 		m(2,0) = 1;
 		m(3,0) = 1;
+		return m;
 	}
 
 	// check if a point is within clip region
@@ -76,19 +77,17 @@ class Point {
 };
 
 
-
-
 /**
  * Clip the polygon with vertex count in and verticies inx and iny against
  * the rectangular clipping region specified by lower left corner (x0, y0) 
  * and upper right corner (x1, y1).  The resulting vertices are places in
  * outx, and outy with the vertex count places in out.
  */
-void clipPolygon (vector<Matrix> *invp) {
-  /* provide your implementation here */
+
+vector<Matrix> clipper (vector<Matrix> inv) {
+	cout << " inv.size: " << inv.size() << endl << (inv)[0] << endl;
 	vector<Matrix> outv;
-	cout << " invp.size: " << (*invp).size() << endl << (*invp)[0] << endl;
-	vector<Matrix> inv(*invp);
+
 	int in = inv.size();
 	assert(in>0);
 	Point S(inv.at(inv.size()-1));

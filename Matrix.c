@@ -19,6 +19,8 @@ Matrix::Matrix() : _rows(4), _cols(4), _size(16) {
 Matrix::Matrix(int rows,int cols) :
 		_rows(rows), _cols(cols), _size(rows*cols) {
 	assert(_size<=16);
+	assert(_cols > 0 && _cols <= 4);
+	assert(_rows > 0 && _rows <= 4);
 	_data = new double[_size];
 	clear();
 }
@@ -59,9 +61,13 @@ Matrix::Matrix(const Matrix& m) {
 	_rows = m._rows;
 	_cols = m._cols;
 	_size = m._size;
+	assert(_size<=16);
+	assert(_cols > 0 && _cols <= 4);
+	assert(_rows > 0 && _rows <= 4);
 	_data = new double[_size];
-	for(int i=0;i<_size;i++) {
-		_data[i] = m._data[i];
+	for(int i=0;i<m._size;i++) {
+		double d = m._data[i]; 
+		_data[i] = d;
 	}
 	assert(_size<=16);
 }
@@ -71,6 +77,9 @@ Matrix& Matrix::operator= (const Matrix& m) {
 	_rows = m._rows;
 	_cols = m._cols;
 	_size = m._size;
+	assert(_size<=16);
+	assert(_cols > 0 && _cols <= 4);
+	assert(_rows > 0 && _rows <= 4);
 	_data = new double[_size];
 	for(int i=0;i<_size;i++) {
 		_data[i] = m._data[i];

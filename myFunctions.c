@@ -23,13 +23,16 @@
 #include "myFunctions.h"
 
 void drawPolygon(vector<Matrix>);
-vector<Matrix> clipPolygon(vector<Matrix> *);
+vector<Matrix> clipPolygon(vector<Matrix>);
+vector<Matrix> clipper(vector<Matrix>);
 
 using namespace std;
 
-Matrix modelview;
-Matrix projection;
-Matrix *currentmatrix = &modelview;
+Matrix matrix_modelview;
+Matrix matrix_projection;
+#define MATRIX_VIEWPORT 530
+Matrix matrix_viewport;
+Matrix *currentmatrix = &matrix_modelview;
 
 stack<Matrix> matrixstack;
 vector<Matrix> vertices;
@@ -40,6 +43,12 @@ struct window{
 	double x1,y1,x2,y2;
 } clip,viewport;
 
+void printvector(vector<Matrix> &v) {
+	vector<Matrix>::iterator iter = v.begin();
+	for(;iter!=v.end();iter++) {
+		cout << *iter << endl;
+	}
+}
 
 /**
  *  myBegin - delimit the vertices of a primitive or a group of like primitives.
@@ -77,10 +86,11 @@ void myEnd()
 {	
 	
 	if(vertices.size() <= 0) return;
-	cout << "vertices: " << vertices.size();
-	vector<Matrix> v(vertices);
-	vector<Matrix> polygon_vertices = clipPolygon(&v);
-	cout << " polygon_vertices: " << polygon_vertices.size() << endl;
+	cout << "NORMALIZED:" << endl;
+	printvector(vertices);
+	vector<Matrix> polygon_vertices = clipper(vertices);
+	cout << "CLIPPED:" << endl;
+	printvector(polygon_vertices);
 	if(polygon_vertices.size() > 0)
 		drawPolygon(polygon_vertices);
 }
@@ -98,7 +108,7 @@ void myVertex2f(float x, float y)
 	pt(1,0) = y;
 	pt(2,0) = 0.0;
 	pt(3,0) = 1.0;
-	vertices.push_back(pt);
+	vertices.push_back(matrix_modelview * pt);
 }
 
 
@@ -155,10 +165,13 @@ void myClear(GLbitfield mask)
 void myMatrixMode(int mode) {
 	switch(mode) {
 	case GL_PROJECTION:
-		currentmatrix = &projection;
+		currentmatrix = &matrix_projection;
 		break;
 	case GL_MODELVIEW:
-		currentmatrix = &modelview;
+		currentmatrix = &matrix_modelview;
+		break;
+	case MATRIX_VIEWPORT:
+		currentmatrix = &matrix_viewport;
 		break;
 	}
 }
@@ -277,17 +290,18 @@ void myScalef(float x, float y) {
 void myOrtho2D(	double left, double right, double bottom, double top)
 {
 	cout << "myOrtho2d" << endl;
-	myLoadIdentity();
 	//gluOrtho2D (left, right, bottom, top);
 	clip.x1 = left;
 	clip.y1 = bottom;
 	clip.x2 = right;
 	clip.y2 = top;
 	myMatrixMode(GL_MODELVIEW);
+	myLoadIdentity();
+	cout << matrix_modelview << endl << endl;
 	myTranslatefx(-left,-bottom);
-	myScalefx(2*(right-left),2*(top-bottom));
+	myScalefx(2.0/(right-left),2.0/(top-bottom));
 	myTranslatefx(-1,-1);
-	cout << modelview << endl << endl;
+	cout << matrix_modelview << endl << endl;
 }
 
 
@@ -301,14 +315,18 @@ void myOrtho2D(	double left, double right, double bottom, double top)
 void myViewport(int x, int y, int width, int height)
 {
 	//glViewport (x, y, width, height);
-	myMatrixMode(GL_MODELVIEW);
+	myMatrixMode(MATRIX_VIEWPORT);
+	myLoadIdentityCurrent();
+	cout << "myViewport" << endl;
 	viewport.x1 = x;
 	viewport.x2 = x + width;
 	viewport.y1 = y;	
 	viewport.y2 = y + height;
 
 	myTranslatefx(1,1);
-	myScalefx(2/(viewport.x2-viewport.x1),
-		  2/(viewport.x2-viewport.x1));
+	myScalefx(2*(viewport.x2-viewport.x1),
+		  2*(viewport.x2-viewport.x1));
 	myTranslatefx(viewport.x1,viewport.y1);
+	cout << matrix_viewport << endl;
+	myMatrixMode(GL_MODELVIEW);
 }
