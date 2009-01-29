@@ -1,6 +1,6 @@
 
-#define SCR_HEIGHT 300
-#define SCR_WIDTH 300
+#define SCR_HEIGHT screenHeight
+#define SCR_WIDTH screenWidth
 #include <cassert>
 #include <vector>
 #include <algorithm>
@@ -13,6 +13,9 @@
 #endif
 
 using namespace std;
+
+extern int screenHeight;
+extern int screenWidth;
 
 // the same buckets as in class
 class Bucket {
@@ -50,7 +53,7 @@ void drawPolygon(vector<Matrix> vertex) {
 		y1 = vertex[(i+1)%n](1,0);
 		x0 = vertex[i](0,0);
 		x1 = vertex[(i+1)%n](0,0);
-		assert(y0<SCR_HEIGHT);
+		//assert(y0<SCR_HEIGHT);
 		if(y1 < y0) { // swap points
 			int swap;	
 			swap = y0; y0 = y1; y1 = swap;	
@@ -119,7 +122,8 @@ void drawPolygon(vector<Matrix> vertex) {
 			      int((*iter)->x) == x) { 
 				draw = !draw; iter++; 
 			}
-			if(draw) setPixel(x,y);
+			if(y >= 0 && y <SCR_HEIGHT)
+				if(draw) setPixel(x,y);
 		}	
 		for(iter = aet.begin();iter!=aet.end();iter++) {
 			(*iter)->x += (*iter)->xinc;

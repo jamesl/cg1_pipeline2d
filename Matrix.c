@@ -26,15 +26,20 @@ Matrix::Matrix(int rows,int cols) :
 }
 
 double& Matrix::operator() (int row, int col) {
+	assert(_size<=16);
+	assert(_cols > 0 && _cols <= 4);
+	assert(_rows > 0 && _rows <= 4);
 	int loc = _cols*row+col;
 	assert(loc<_size);
 	return _data[loc];
-	assert(_size<=16);
 }
 
 void Matrix::clear() { for(int i=0;i<_size;i++) _data[i]=0.0; }
+int Matrix::getRows() const { return _rows; }
+int Matrix::getCols() const { return _cols; }
 
 ostream& operator<<(ostream& os, const Matrix &m) {
+	assert(&m!=0);
 	for(int i=0;i<m.getRows();i++) {	
 		os << " [ ";
 		for(int j=0;j<m.getCols();j++) {
@@ -46,14 +51,18 @@ ostream& operator<<(ostream& os, const Matrix &m) {
 }
 			
 double	Matrix::operator() (int row, int col) const {
+	assert(_size<=16);
+	assert(_cols > 0 && _cols <= 4);
+	assert(_rows > 0 && _rows <= 4);
 	int loc = _cols*row+col;
 	assert(loc<_size);
 	return _data[loc];
-	assert(_size<=16);
 }
 
 Matrix::~Matrix() {
 	delete [] _data;
+	_rows=_cols=_size=0;
+	_data=0;
 }
 
 Matrix::Matrix(const Matrix& m) {

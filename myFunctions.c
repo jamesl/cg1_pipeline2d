@@ -23,7 +23,6 @@
 #include "myFunctions.h"
 
 void drawPolygon(vector<Matrix>);
-vector<Matrix> clipPolygon(vector<Matrix>);
 vector<Matrix> clipper(vector<Matrix>);
 
 using namespace std;
@@ -89,10 +88,11 @@ void myEnd()
 	cout << "NORMALIZED:" << endl;
 	printvector(vertices);
 	vector<Matrix> polygon_vertices = clipper(vertices);
-	cout << "CLIPPED:" << endl;
-	printvector(polygon_vertices);
-	if(polygon_vertices.size() > 0)
+	if(polygon_vertices.size() > 0) {
+		polygon_vertices = matrix_viewport * polygon_vertices;
+		cout << "drawing... " << endl;
 		drawPolygon(polygon_vertices);
+	}
 }
 
 
@@ -223,7 +223,7 @@ void myTranslatefx(float x, float y) {
 	translate(0,3) = x;
 	translate(1,3) = y;
 	translate(2,3) = 1.0;
-	(*currentmatrix) = (*currentmatrix) * translate;
+	(*currentmatrix) = translate * (*currentmatrix);
 }
 void myTranslatef(float x, float y) {
 	myMatrixMode(GL_MODELVIEW);
@@ -248,7 +248,7 @@ void myRotatefx(float angle) {
 	rotate(0,0) = rotate(1,1) = cos(angle);
 	rotate(0,1) = -sin(angle);
 	rotate(1,0) = sin(angle);
-	(*currentmatrix) = (*currentmatrix) * rotate;
+	(*currentmatrix) = rotate * (*currentmatrix);
 }
 void myRotatef(float angle) {
 	myMatrixMode (GL_MODELVIEW);
@@ -271,7 +271,7 @@ void myScalefx(float x, float y) {
 	scale(0,0) = x;
 	scale(1,1) = y;
 	scale(2,2) = scale(3,3) = 1.0;
-	(*currentmatrix) = (*currentmatrix) * scale;
+	(*currentmatrix) = scale * (*currentmatrix);
 }
 void myScalef(float x, float y) {
 	myMatrixMode(GL_MODELVIEW);
@@ -324,9 +324,9 @@ void myViewport(int x, int y, int width, int height)
 	viewport.y2 = y + height;
 
 	myTranslatefx(1,1);
-	myScalefx(2*(viewport.x2-viewport.x1),
-		  2*(viewport.x2-viewport.x1));
-	myTranslatefx(viewport.x1,viewport.y1);
+	myScalefx((width)/2,
+		  (height)/2);
+	myTranslatefx(x,y);
 	cout << matrix_viewport << endl;
 	myMatrixMode(GL_MODELVIEW);
 }

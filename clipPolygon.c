@@ -111,4 +111,5 @@ vector<Matrix> clipper (vector<Matrix> inv) {
 		S = P;
 	}
 	}
+	return outv;
 }

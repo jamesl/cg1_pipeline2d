@@ -18,8 +18,8 @@ class Matrix {
 	Matrix  operator* (const Matrix& m);
 	vector<Matrix> operator* (const vector<Matrix>& v);
 
-	int getRows() const { return _rows; }
-	int getCols() const { return _cols; }
+	int getRows() const;
+	int getCols() const;
 	void clear();
 
   private:
