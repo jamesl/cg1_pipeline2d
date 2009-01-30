@@ -24,6 +24,8 @@
 
 void drawPolygon(vector<Matrix>);
 vector<Matrix> clipper(vector<Matrix>);
+extern int screenWidth;
+extern int screenHeight;
 
 using namespace std;
 
@@ -31,6 +33,8 @@ Matrix matrix_modelview;
 Matrix matrix_projection;
 #define MATRIX_VIEWPORT 530
 Matrix matrix_viewport;
+#define MATRIX_NORMALIZE 531
+Matrix matrix_normalize;
 Matrix *currentmatrix = &matrix_modelview;
 
 stack<Matrix> matrixstack;
@@ -83,16 +87,27 @@ void myBegin(GLenum mode) {
  */
 void myEnd()
 {	
-	
-	if(vertices.size() <= 0) return;
-	cout << "NORMALIZED:" << endl;
-	printvector(vertices);
-	vector<Matrix> polygon_vertices = clipper(vertices);
-	if(polygon_vertices.size() > 0) {
-		polygon_vertices = matrix_viewport * polygon_vertices;
-		cout << "drawing... " << endl;
-		drawPolygon(polygon_vertices);
+	if(1) {
+		vertices = clipper(vertices);
+		drawPolygon(vertices);
+		return;
 	}
+//	if(vertices.size() <= 0) return;
+//	cout << "UNTRANSFORMED:" << endl;
+//	printvector(vertices);
+//	cout << "MODELVIEW:" << endl << matrix_modelview << endl;
+//	cout << "NORMALIZE:" << endl << matrix_normalize << endl;
+//	cout << "TRANSFORMED:" << endl;
+//	vertices = matrix_normalize * matrix_modelview * vertices;
+//	printvector(vertices);
+//
+//	vector<Matrix> polygon_vertices = clipper(vertices);
+//	if(polygon_vertices.size() > 0) {
+//		polygon_vertices = matrix_viewport * polygon_vertices;
+//		cout << "drawing:" << endl;
+//		printvector(polygon_vertices);
+//		drawPolygon(polygon_vertices);
+//	}
 }
 
 
@@ -108,7 +123,12 @@ void myVertex2f(float x, float y)
 	pt(1,0) = y;
 	pt(2,0) = 0.0;
 	pt(3,0) = 1.0;
-	vertices.push_back(matrix_modelview * pt);
+	pt = 	matrix_normalize * 
+		matrix_modelview * pt;
+	if(pt(0,0) < -1 || pt(0,0) > 1) return;	
+	if(pt(1,0) < -1 || pt(1,0) > 1) return;
+	vertices.push_back(pt);
+	
 }
 
 
@@ -173,6 +193,9 @@ void myMatrixMode(int mode) {
 	case MATRIX_VIEWPORT:
 		currentmatrix = &matrix_viewport;
 		break;
+	case MATRIX_NORMALIZE:
+		currentmatrix = &matrix_normalize;
+		break;
 	}
 }
 
@@ -223,7 +246,8 @@ void myTranslatefx(float x, float y) {
 	translate(0,3) = x;
 	translate(1,3) = y;
 	translate(2,3) = 1.0;
-	(*currentmatrix) = translate * (*currentmatrix);
+	(*currentmatrix) = (*currentmatrix) * translate;
+	cout << "MODELVIEW:" << endl << matrix_modelview << endl;
 }
 void myTranslatef(float x, float y) {
 	myMatrixMode(GL_MODELVIEW);
@@ -248,7 +272,8 @@ void myRotatefx(float angle) {
 	rotate(0,0) = rotate(1,1) = cos(angle);
 	rotate(0,1) = -sin(angle);
 	rotate(1,0) = sin(angle);
-	(*currentmatrix) = rotate * (*currentmatrix);
+	(*currentmatrix) = (*currentmatrix) * rotate;
+	cout << "MODELVIEW:" << endl << matrix_modelview << endl;
 }
 void myRotatef(float angle) {
 	myMatrixMode (GL_MODELVIEW);
@@ -271,7 +296,8 @@ void myScalefx(float x, float y) {
 	scale(0,0) = x;
 	scale(1,1) = y;
 	scale(2,2) = scale(3,3) = 1.0;
-	(*currentmatrix) = scale * (*currentmatrix);
+	(*currentmatrix) = (*currentmatrix) * scale;
+	cout << "MODELVIEW:" << endl << matrix_modelview << endl;
 }
 void myScalef(float x, float y) {
 	myMatrixMode(GL_MODELVIEW);
@@ -295,13 +321,15 @@ void myOrtho2D(	double left, double right, double bottom, double top)
 	clip.y1 = bottom;
 	clip.x2 = right;
 	clip.y2 = top;
-	myMatrixMode(GL_MODELVIEW);
-	myLoadIdentity();
-	cout << matrix_modelview << endl << endl;
-	myTranslatefx(-left,-bottom);
-	myScalefx(2.0/(right-left),2.0/(top-bottom));
+	myMatrixMode(MATRIX_NORMALIZE);
+	myLoadIdentityCurrent();
+	//cout << matrix_modelview << endl << endl;
 	myTranslatefx(-1,-1);
-	cout << matrix_modelview << endl << endl;
+	myScalefx(2.0/(right-left),2.0/(top-bottom));
+	myTranslatefx(-left,-bottom);
+	cout << "NORMALIZE MATRIX:" << endl;
+	cout << matrix_normalize << endl << endl;
+	myMatrixMode(GL_MODELVIEW);
 }
 
 
@@ -327,6 +355,6 @@ void myViewport(int x, int y, int width, int height)
 	myScalefx((width)/2,
 		  (height)/2);
 	myTranslatefx(x,y);
-	cout << matrix_viewport << endl;
+	cout << "MATRIX_VIEWPORT:" << matrix_viewport << endl;
 	myMatrixMode(GL_MODELVIEW);
 }

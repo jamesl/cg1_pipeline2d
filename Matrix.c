@@ -102,9 +102,7 @@ vector<Matrix>  Matrix::operator* (const vector<Matrix>& v) {
 	vector<Matrix> w;
 	cout << v.size() << endl;
 	for(int i=0;i<v.size();i++) {
-		cout << v.at(i);
 		w.push_back((*this) * v.at(i));
-		cout << w.at(i) << endl;
 	}
 	return w;
 }
