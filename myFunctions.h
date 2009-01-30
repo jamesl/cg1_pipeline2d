@@ -47,8 +47,10 @@ extern void myViewport(int x, int y, int width, int height);
 
 void myMatrixMode(GLenum mode);
 
+// push matrix onto stack
 void myPushMatrix();
 
+// pop matrix off of stack
 void myPopMatrix();
 
 void myLoadIdentityCurrent();
