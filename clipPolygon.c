@@ -51,11 +51,11 @@ class Point {
 			// move in x
 			case 0: // right
 				q.x = 1;
-				q.y = r.y + (-1 - r.x) * m;
+				q.y = r.y + (1 - r.x) * m;
 				return q;
 			case 3: // left
 				q.x = -1;
-				q.y = r.y + (1 - r.x) * m;
+				q.y = r.y + (-1 - r.x) * m;
 			// move in y
 			case 1: // top
 				q.y = 1;
@@ -92,9 +92,11 @@ vector<Matrix> clipper (vector<Matrix> inv) {
 	int in = inv.size();
 	assert(in>0);
 	Point S(inv.at(inv.size()-1));
-	
+
 	for(int clip=0;clip<4;clip++) {
-	for(int i=0;i<in;i++) {
+	   outv.clear();
+	   in = inv.size();
+	   for(int i=0;i<in;i++) {
 		Point P(inv[i]);
 		if(P.inside(clip)) { // right edge
 			if(!(S.inside(clip))) { 
@@ -110,7 +112,8 @@ vector<Matrix> clipper (vector<Matrix> inv) {
 			outv.push_back(Q.matrix());
 		}
 		S = P;
-	}
+	   }
+	   inv = outv;
 	}
 	cout << " outv.size: " << outv.size() << endl;
 	return outv;
