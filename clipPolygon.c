@@ -4,6 +4,13 @@
 #include "Matrix.h"
 #include <cassert>
 
+enum clip_plane {
+	RIGHT=0,
+	TOP=1,
+	BOTTOM=2,
+	LEFT=3
+};
+
 // Point class stores coordinates
 // and has methods for the Sutherland-Hodgeman
 // clipping algorithm
@@ -24,7 +31,7 @@ class Point {
 	}
 
 	// check if a point is within clip region
-	bool inside(int clip) {
+	bool inside(enum clip_plane clip) {
 		switch(clip) {
 			case 0: // right
 				return x < 1;
@@ -40,7 +47,7 @@ class Point {
 	// move this point into the clip region. this point is
 	// outside the clip region, and point r is within the clip
 	// region. 
-	Point moveIn(Point r,int clip) {
+	Point moveIn(Point r,enum clip_plane clip) {
 		Point q(x,y);
 		bool vert = (x == r.x);
 		float m;
@@ -56,6 +63,7 @@ class Point {
 			case 3: // left
 				q.x = -1;
 				q.y = r.y + (-1 - r.x) * m;
+				return q;
 			// move in y
 			case 1: // top
 				q.y = 1;
@@ -73,8 +81,12 @@ class Point {
 				return q;
 		}
 	}
-
+	
 };
+
+ostream& operator<<(ostream& os, const Point &p) {
+	os << "(" << p.x << "," << p.y << ")";
+}
 
 
 /**
@@ -84,37 +96,47 @@ class Point {
  * outx, and outy with the vertex count places in out.
  */
 
-vector<Matrix> clipper (vector<Matrix> inv) {
+vector<Matrix> clipAgainst (vector<Matrix> inv,enum clip_plane clip) {
 	vector<Matrix> outv;
 	cout << " inv.size: " << inv.size() << endl;
 	cout << " outv.size: " << outv.size() << endl;
 
 	int in = inv.size();
-	assert(in>0);
+	if(in<=0) return outv;
 	Point S(inv.at(inv.size()-1));
 
-	for(int clip=0;clip<4;clip++) {
-	   outv.clear();
-	   in = inv.size();
-	   for(int i=0;i<in;i++) {
+	cout << "Clipping against edge " << clip << endl;
+	for(int i=0;i<in;i++) {
 		Point P(inv[i]);
 		if(P.inside(clip)) { // right edge
 			if(!(S.inside(clip))) { 
 				// compute intersection S, P
 				Point Q = S.moveIn(P,clip);
+				cout << "\tMoved " << P << " into " << Q << endl;
 				outv.push_back(Q.matrix());
 			}
 			// output P
 			outv.push_back(P.matrix());
+			cout << "\tUsing " << P << " unchanged." << endl;
 		} else if(S.inside(clip)) {
 			// compute intersection P, S
 			Point Q = P.moveIn(S,clip);
 			outv.push_back(Q.matrix());
+			cout << "\tMoved " << S << " into " << Q << endl;
 		}
 		S = P;
-	   }
-	   inv = outv;
 	}
+	inv = outv;
+
 	cout << " outv.size: " << outv.size() << endl;
 	return outv;
 }
+
+vector<Matrix> clipper(vector <Matrix> v) {
+	v = clipAgainst(v,RIGHT);
+	v = clipAgainst(v,TOP);
+	v = clipAgainst(v,BOTTOM);
+	v = clipAgainst(v,LEFT);
+	return v;
+}
+
