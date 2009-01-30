@@ -85,8 +85,9 @@ class Point {
  */
 
 vector<Matrix> clipper (vector<Matrix> inv) {
-	cout << " inv.size: " << inv.size() << endl << (inv)[0] << endl;
 	vector<Matrix> outv;
+	cout << " inv.size: " << inv.size() << endl;
+	cout << " outv.size: " << outv.size() << endl;
 
 	int in = inv.size();
 	assert(in>0);
@@ -111,5 +112,6 @@ vector<Matrix> clipper (vector<Matrix> inv) {
 		S = P;
 	}
 	}
+	cout << " outv.size: " << outv.size() << endl;
 	return outv;
 }

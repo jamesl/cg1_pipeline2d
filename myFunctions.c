@@ -89,7 +89,8 @@ void myEnd()
 {	
 	vertices = clipper(vertices);
 	vertices = matrix_viewport * vertices;
-	drawPolygon(vertices);
+	printvector(vertices);
+//	drawPolygon(vertices);
 	return;
 //	if(vertices.size() <= 0) return;
 //	cout << "UNTRANSFORMED:" << endl;
@@ -122,8 +123,8 @@ void myVertex2f(float x, float y)
 	pt(1,0) = y;
 	pt(2,0) = 0.0;
 	pt(3,0) = 1.0;
-	pt = 	matrix_modelview * 
-		matrix_normalize * pt;
+	pt = 	matrix_normalize * 
+		matrix_modelview * pt;
 	// crude clip
 //	if(pt(0,0) <= -1 || pt(0,0) >= 1) return;
 //	if(pt(1,0) <= -1 || pt(1,0) >= 1) return;
@@ -326,6 +327,7 @@ void myOrtho2D(	double left, double right, double bottom, double top)
 	myLoadIdentityCurrent();
 	//cout << matrix_modelview << endl << endl;
 	myTranslatefx(-left,-bottom);
+	myTranslatefx(-100,-100);
 	myScalefx(2.0/(right-left),2.0/(top-bottom));
 	myTranslatefx(-1,-1);
 	cout << "NORMALIZE MATRIX:" << endl;
