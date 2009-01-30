@@ -1,3 +1,4 @@
+// used for storing colors
 
 typedef struct {
 	float r;

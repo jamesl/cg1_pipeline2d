@@ -74,7 +74,7 @@ void myBegin(GLenum mode) {
  */
 void myEnd()
 {
-	switch(vertex_mode) {
+	switch(vertexmode) {
 	case GL_POLYGON:	
 		// clip normalized vertices
 		vertices = clipper(vertices);

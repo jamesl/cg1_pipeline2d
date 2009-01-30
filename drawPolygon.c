@@ -53,7 +53,6 @@ void drawPolygon(vector<Matrix> vertex) {
 		y1 = vertex[(i+1)%n](1,0);
 		x0 = vertex[i](0,0);
 		x1 = vertex[(i+1)%n](0,0);
-		//assert(y0<SCR_HEIGHT);
 		if(y1 < y0) { // swap points
 			int swap;	
 			swap = y0; y0 = y1; y1 = swap;	
@@ -67,6 +66,8 @@ void drawPolygon(vector<Matrix> vertex) {
 		Bucket *edge = new Bucket(
 			y1,x0,(float)(x1-x0)/(float)(y1-y0));
 		if(y0 < 0 || y0 >= screenHeight) {
+			// now that this code is working,
+			// we should never get here.
 			cerr << "oops, y0=" << y0 << "!" << endl;
 			continue; 
 		}

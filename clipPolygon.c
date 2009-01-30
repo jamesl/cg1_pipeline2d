@@ -17,10 +17,15 @@ enum clip_plane {
 class Point {
   public:
 	double x,y;
-
+	
+	// construct a point given 2 coordinates
 	Point(double _x, double _y) : x(_x), y(_y) { }
+	// in the 2d pipeline, we are using a 4x1 matrix
+	// to represent a vertex, so it is easier to construct
+	// from a Matrix
 	Point(Matrix a) : x(a(0,0)), y(a(1,0)) { }
 
+	// create a Matrix representation of this point
 	Matrix matrix() {
 		Matrix m(4,1);	
 		m(0,0) = x;
@@ -54,6 +59,7 @@ class Point {
 		if(!vert) m = (y - r.y) / (x - r.x);
 		// we know r is in clip window, we must move
 		// q so that it is also.
+		// now uses normalized clipping
 		switch(clip) {
 			// move in x
 			case 0: // right
@@ -84,54 +90,49 @@ class Point {
 	
 };
 
+/** 
+ * used for printing points 
+ */
 ostream& operator<<(ostream& os, const Point &p) {
 	os << "(" << p.x << "," << p.y << ")";
 }
 
 
 /**
- * Clip the polygon with vertex count in and verticies inx and iny against
- * the rectangular clipping region specified by lower left corner (x0, y0) 
- * and upper right corner (x1, y1).  The resulting vertices are places in
- * outx, and outy with the vertex count places in out.
+ * clip vertices in inv against edge clip
  */
-
 vector<Matrix> clipAgainst (vector<Matrix> inv,enum clip_plane clip) {
 	vector<Matrix> outv;
-	cout << " inv.size: " << inv.size() << endl;
-	cout << " outv.size: " << outv.size() << endl;
 
 	int in = inv.size();
 	if(in<=0) return outv;
 	Point S(inv.at(inv.size()-1));
 
-	cout << "Clipping against edge " << clip << endl;
 	for(int i=0;i<in;i++) {
 		Point P(inv[i]);
 		if(P.inside(clip)) { // right edge
 			if(!(S.inside(clip))) { 
 				// compute intersection S, P
 				Point Q = S.moveIn(P,clip);
-				cout << "\tMoved " << P << " into " << Q << endl;
 				outv.push_back(Q.matrix());
 			}
 			// output P
 			outv.push_back(P.matrix());
-			cout << "\tUsing " << P << " unchanged." << endl;
 		} else if(S.inside(clip)) {
 			// compute intersection P, S
 			Point Q = P.moveIn(S,clip);
 			outv.push_back(Q.matrix());
-			cout << "\tMoved " << S << " into " << Q << endl;
 		}
 		S = P;
 	}
-	inv = outv;
 
-	cout << " outv.size: " << outv.size() << endl;
 	return outv;
 }
 
+/**
+ * clip a polygon against all 4 edges,
+ * 1 at a time.
+ */
 vector<Matrix> clipper(vector <Matrix> v) {
 	v = clipAgainst(v,RIGHT);
 	v = clipAgainst(v,TOP);
