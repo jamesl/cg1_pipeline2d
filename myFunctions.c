@@ -261,8 +261,9 @@ void myTranslatef(float x, float y) {
  * For this implementation, it is assumed that the current matrix is the 
  * transformation (MODELVIEW) matrix.
  */
-void myRotatefx(float angle) {
+void myRotatefx(float degrees) {
 	Matrix rotate;
+	double angle = degrees * 3.14159 / 180.0;
 	rotate(2,2) = rotate(3,3) = 1.0;
 	rotate(0,0) = rotate(1,1) = cos(angle);
 	rotate(0,1) = -sin(angle);
