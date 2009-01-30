@@ -21,6 +21,7 @@
 #include "Matrix.h"
 #include "color.h"
 #include "myFunctions.h"
+#include "setPixel.h"
 
 void drawPolygon(vector<Matrix>);
 vector<Matrix> clipper(vector<Matrix>);
@@ -158,7 +159,6 @@ void myClearColor(	float  	red,
 					float  	blue, 
 					float  	alpha)
 {
-	glClearColor (red, green, blue, alpha);
 	setclearcolor(red,green,blue);
 }
 
@@ -177,7 +177,15 @@ void myClearColor(	float  	red,
  */
 void myClear(GLbitfield mask)
 {
-	glClear (mask);
+	color c;
+	switch(mask) {
+	case GL_COLOR_BUFFER_BIT:
+		c = getclearcolor();
+		break;
+	}
+	for(int x=0;x<screenWidth;x++)
+		for(int y=0;y<screenHeight;y++)
+			setPixel(x,y,c.r,c.g,c.b);
 }
 
 void myMatrixMode(int mode) {
