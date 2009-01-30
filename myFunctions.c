@@ -32,27 +32,13 @@ using namespace std;
 
 Matrix matrix_modelview;
 Matrix matrix_projection;
-#define MATRIX_VIEWPORT 530
 Matrix matrix_viewport;
-#define MATRIX_NORMALIZE 531
 Matrix matrix_normalize;
 Matrix *currentmatrix = &matrix_modelview;
 
 stack<Matrix> matrixstack;
 vector<Matrix> vertices;
 GLenum vertexmode;
-
-struct window{
-	//Matrix a(4,1),b(4,1);
-	double x1,y1,x2,y2;
-} clip,viewport;
-
-void printvector(vector<Matrix> &v) {
-	vector<Matrix>::iterator iter = v.begin();
-	for(;iter!=v.end();iter++) {
-		cout << *iter << endl;
-	}
-}
 
 /**
  *  myBegin - delimit the vertices of a primitive or a group of like primitives.
@@ -87,28 +73,18 @@ void myBegin(GLenum mode) {
  * This routine will initiate the processing and drawing of a polygon.
  */
 void myEnd()
-{	
-	vertices = clipper(vertices);
-	printvector(vertices);
-	vertices = matrix_viewport * vertices;
-	drawPolygon(vertices);
+{
+	switch(vertex_mode) {
+	case GL_POLYGON:	
+		// clip normalized vertices
+		vertices = clipper(vertices);
+		// transform into screen coords
+		vertices = matrix_viewport * vertices;
+		// draw polygon
+		drawPolygon(vertices);
+		break;
+	}
 	return;
-//	if(vertices.size() <= 0) return;
-//	cout << "UNTRANSFORMED:" << endl;
-//	printvector(vertices);
-//	cout << "MODELVIEW:" << endl << matrix_modelview << endl;
-//	cout << "NORMALIZE:" << endl << matrix_normalize << endl;
-//	cout << "TRANSFORMED:" << endl;
-//	vertices = matrix_normalize * matrix_modelview * vertices;
-//	printvector(vertices);
-//
-//	vector<Matrix> polygon_vertices = clipper(vertices);
-//	if(polygon_vertices.size() > 0) {
-//		polygon_vertices = matrix_viewport * polygon_vertices;
-//		cout << "drawing:" << endl;
-//		printvector(polygon_vertices);
-//		drawPolygon(polygon_vertices);
-//	}
 }
 
 
@@ -124,6 +100,9 @@ void myVertex2f(float x, float y)
 	pt(1,0) = y;
 	pt(2,0) = 0.0;
 	pt(3,0) = 1.0;
+	// multiply each point by normalize
+	// and modelview upon insertion into
+	// list
 	pt = 	matrix_normalize * 
 		matrix_modelview * pt;
 	vertices.push_back(pt);
@@ -141,7 +120,6 @@ void myColor3f(	float  	red,
 				float  	green, 
 				float  	blue)
 {
-	glColor3f( red, green, blue);
 	setcolor(red,green,blue);
 }
 
@@ -188,6 +166,11 @@ void myClear(GLbitfield mask)
 			setPixel(x,y,c.r,c.g,c.b);
 }
 
+/**
+ * myMatrixMode
+ * switch to a new matrix mode:
+ * only projection and modelview are supported
+ */
 void myMatrixMode(int mode) {
 	switch(mode) {
 	case GL_PROJECTION:
@@ -196,17 +179,23 @@ void myMatrixMode(int mode) {
 	case GL_MODELVIEW:
 		currentmatrix = &matrix_modelview;
 		break;
-	default:
-		cerr << "oops - not a matrix!" << endl;
-		break;
 	}
 }
 
+/**
+ * myPushMatrix
+ * push currentmatrix to top of matrix stack
+ */
 void myPushMatrix() {
 	assert(currentmatrix != 0);
 	matrixstack.push(*currentmatrix);
 }
 
+/**
+ * myPopMatrix
+ * change currentmatrix to matrix on top
+ * of matrix stack
+ */
 void myPopMatrix() {
 	assert(matrixstack.size());
 	assert(currentmatrix != 0);
@@ -214,6 +203,11 @@ void myPopMatrix() {
 	matrixstack.pop();
 }
 
+/**
+ * myLoadIdentityCurrent - load the 
+ * identity matrix into whatever matrix
+ * is currently set
+ */
 void myLoadIdentityCurrent() {
 	assert(currentmatrix != 0);
 	for(int i=0;i<4;i++)
@@ -243,7 +237,8 @@ void myLoadIdentity( void)
  * For this implementation, it is assumed that the current matrix is the 
  * transformation (MODELVIEW) matrix.
  */
-void myTranslatefx(float x, float y) {
+void myTranslatef(float x, float y) {
+	myMatrixMode(GL_MODELVIEW);
 	Matrix translate;
 	translate(0,0) = translate(1,1) = 1.0;
 	translate(2,2) = translate(3,3) = 1.0;
@@ -251,10 +246,6 @@ void myTranslatefx(float x, float y) {
 	translate(1,3) = y;
 	translate(2,3) = 1.0;
 	(*currentmatrix) = (*currentmatrix) * translate;
-}
-void myTranslatef(float x, float y) {
-	myMatrixMode(GL_MODELVIEW);
-	myTranslatefx(x,y);
 }
 
 
@@ -269,18 +260,16 @@ void myTranslatef(float x, float y) {
  * For this implementation, it is assumed that the current matrix is the 
  * transformation (MODELVIEW) matrix.
  */
-void myRotatefx(float degrees) {
+void myRotatef(float degrees) {
+	myMatrixMode (GL_MODELVIEW);
 	Matrix rotate;
+	// GL uses degrees, but math.h uses radians!
 	double angle = degrees * 3.14159 / 180.0;
 	rotate(2,2) = rotate(3,3) = 1.0;
 	rotate(0,0) = rotate(1,1) = cos(angle);
 	rotate(0,1) = -sin(angle);
 	rotate(1,0) = sin(angle);
 	(*currentmatrix) = (*currentmatrix) * rotate;
-}
-void myRotatef(float angle) {
-	myMatrixMode (GL_MODELVIEW);
-	myRotatefx(angle);
 }
 
 
@@ -294,16 +283,13 @@ void myRotatef(float angle) {
  * transformation (MODELVIEW) matrix.
  *
  */
-void myScalefx(float x, float y) {
+void myScalef(float x, float y) {
+	myMatrixMode(GL_MODELVIEW);
 	Matrix scale;
 	scale(0,0) = x;
 	scale(1,1) = y;
 	scale(2,2) = scale(3,3) = 1.0;
 	(*currentmatrix) = (*currentmatrix) * scale;
-}
-void myScalef(float x, float y) {
-	myMatrixMode(GL_MODELVIEW);
-	myScalefx(x,y);
 }
 
 /**
@@ -317,20 +303,12 @@ void myScalef(float x, float y) {
  */
 void myOrtho2D(	double left, double right, double bottom, double top)
 {
-	cout << "myOrtho2d" << endl;
-	//gluOrtho2D (left, right, bottom, top);
-	clip.x1 = left;
-	clip.y1 = bottom;
-	clip.x2 = right;
-	clip.y2 = top;
-
+	// create matrix to normalize coords
 	matrix_normalize(0,0) = 2.0/(right-left);
 	matrix_normalize(1,1) = 2.0/(top-bottom);
 	matrix_normalize(0,3) = -(right+left)/(right-left);
 	matrix_normalize(1,3) = -(top+bottom)/(top-bottom);
 
-	cout << "NORMALIZE MATRIX:" << endl;
-	cout << matrix_normalize << endl << endl;
 }
 
 
@@ -343,17 +321,10 @@ void myOrtho2D(	double left, double right, double bottom, double top)
  */
 void myViewport(int x, int y, int width, int height)
 {
-	//glViewport (x, y, width, height);
-	cout << "myViewport" << endl;
-	viewport.x1 = x;
-	viewport.x2 = x + width;
-	viewport.y1 = y;	
-	viewport.y2 = y + height;
-
+	// create matrix to take normalized coords
+	// to screen coords
 	matrix_viewport(0,0) = (width)/2.0;
 	matrix_viewport(1,1) = (height)/2.0;
 	matrix_viewport(0,3) = ((x+width)+x)/2.0;
 	matrix_viewport(1,3) = ((y+height)+y)/2.0;
-
-	cout << "MATRIX_VIEWPORT:" << matrix_viewport << endl;
 }
