@@ -14,6 +14,9 @@ Matrix::Matrix() : _rows(4), _cols(4), _size(16) {
 	_data = new double[16];
 	assert(_size<=16);
 	clear();
+	for(int i=0;i<4;i++)
+		for(int j=0;j<4;j++)
+			(*this)(i,j) = (i==j) ? 1.0 : 0;
 }
 
 Matrix::Matrix(int rows,int cols) :

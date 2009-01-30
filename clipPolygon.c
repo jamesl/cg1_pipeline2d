@@ -9,9 +9,9 @@
 // clipping algorithm
 class Point {
   public:
-	int x,y;
+	double x,y;
 
-	Point(int _x, int _y) : x(_x), y(_y) { }
+	Point(double _x, double _y) : x(_x), y(_y) { }
 	Point(Matrix a) : x(a(0,0)), y(a(1,0)) { }
 
 	Matrix matrix() {

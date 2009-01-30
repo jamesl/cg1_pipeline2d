@@ -87,11 +87,10 @@ void myBegin(GLenum mode) {
  */
 void myEnd()
 {	
-	if(1) {
-		vertices = clipper(vertices);
-		drawPolygon(vertices);
-		return;
-	}
+	vertices = clipper(vertices);
+	vertices = matrix_viewport * vertices;
+	drawPolygon(vertices);
+	return;
 //	if(vertices.size() <= 0) return;
 //	cout << "UNTRANSFORMED:" << endl;
 //	printvector(vertices);
@@ -123,10 +122,11 @@ void myVertex2f(float x, float y)
 	pt(1,0) = y;
 	pt(2,0) = 0.0;
 	pt(3,0) = 1.0;
-	pt = 	matrix_normalize * 
-		matrix_modelview * pt;
-	if(pt(0,0) < -1 || pt(0,0) > 1) return;	
-	if(pt(1,0) < -1 || pt(1,0) > 1) return;
+	pt = 	matrix_modelview * 
+		matrix_normalize * pt;
+	// crude clip
+//	if(pt(0,0) <= -1 || pt(0,0) >= 1) return;
+//	if(pt(1,0) <= -1 || pt(1,0) >= 1) return;
 	vertices.push_back(pt);
 	
 }
@@ -213,8 +213,9 @@ void myPopMatrix() {
 
 void myLoadIdentityCurrent() {
 	assert(currentmatrix != 0);
-	for(int c=0;c<4;c++)
-		(*currentmatrix)(c,c) = 1.0;
+	for(int i=0;i<4;i++)
+		for(int j=0;j<4;j++)
+			(*currentmatrix)(i,j) = (i==j) ? 1.0 : 0;
 }
 
 /**
@@ -324,9 +325,9 @@ void myOrtho2D(	double left, double right, double bottom, double top)
 	myMatrixMode(MATRIX_NORMALIZE);
 	myLoadIdentityCurrent();
 	//cout << matrix_modelview << endl << endl;
-	myTranslatefx(-1,-1);
-	myScalefx(2.0/(right-left),2.0/(top-bottom));
 	myTranslatefx(-left,-bottom);
+	myScalefx(2.0/(right-left),2.0/(top-bottom));
+	myTranslatefx(-1,-1);
 	cout << "NORMALIZE MATRIX:" << endl;
 	cout << matrix_normalize << endl << endl;
 	myMatrixMode(GL_MODELVIEW);

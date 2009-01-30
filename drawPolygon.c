@@ -66,7 +66,10 @@ void drawPolygon(vector<Matrix> vertex) {
 		// make a bucket for current edge
 		Bucket *edge = new Bucket(
 			y1,x0,(float)(x1-x0)/(float)(y1-y0));
-		assert(y0>=0);
+		if(y0 < 0 || y0 >= screenHeight) {
+			cerr << "oops, y0=" << y0 << "!" << endl;
+			continue; 
+		}
 		if(edgetable[y0] == 0) {
 			// first edge bucket for this y
 			edgetable[y0] = edge;
