@@ -1,0 +1,28 @@
+Building:
+on OSX:
+make -f Makefile.osx
+on Linux:
+make
+
+Running:
+./main
+./test
+(wait patiently, it's not that fast)
+
+Notes:
+
+For some reason, my star looks a little different than
+the one in the test program. I never could figure out
+why. 
+
+The program "test" runs through some different scenes
+involving houses with different transformations. It
+accomplishes this with the matrix stack.
+
+
+The only difference I noticed on OS X vs. Linux is that
+on Linux you could watch as it drew to the screen, but
+on OS X you don't see anything until it has completed.
+It's really slow, so it takes a while to do anything.
+The window does not show up until the first screen has
+completed doing anything.
