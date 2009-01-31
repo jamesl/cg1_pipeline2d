@@ -171,7 +171,7 @@ void myClear(GLbitfield mask)
  * switch to a new matrix mode:
  * only projection and modelview are supported
  */
-void myMatrixMode(int mode) {
+void myMatrixMode(GLenum mode) {
 	switch(mode) {
 	case GL_PROJECTION:
 		currentmatrix = &matrix_projection;

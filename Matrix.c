@@ -149,7 +149,6 @@ Matrix& Matrix::operator= (const Matrix& m) {
 vector<Matrix>  Matrix::operator* (const vector<Matrix>& v) {
 	vector<Matrix>::const_iterator iter;	
 	vector<Matrix> w;
-	cout << v.size() << endl;
 	for(int i=0;i<v.size();i++) {
 		w.push_back((*this) * v.at(i));
 	}
