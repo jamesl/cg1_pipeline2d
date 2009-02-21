@@ -270,6 +270,7 @@ void display( void ) {
 	/* 
      * Flush GL buffers to the display   
      */
+	myFlush();
     glFlush( );
 	
 }

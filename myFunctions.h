@@ -36,6 +36,7 @@ extern void myVertex3f(float x, float y, float z);
 extern void myColor3f(	float red, float green, float blue);
 extern void myClearColor(	float red, float green, float blue, float alpha);
 extern void myClear(GLbitfield mask);
+extern void myFlush(void);
 
 /*
  * Transformation routines

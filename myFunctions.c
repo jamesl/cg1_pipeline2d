@@ -71,21 +71,26 @@ void myBegin(GLenum mode) {
  * myEnd - delimit the vertices of a primitive or a group of like primitives.  
  * Closes a myBegin() statement.
  *
- * This routine will initiate the processing and drawing of a polygon.
  */
 void myEnd() {
+	// clip normalized vertices
+	vertices = clipper(vertices);
+	// transform into screen coords
+	vertices = matrix_viewport * vertices;
 	displaylist.push_back(vertices);
-	switch(vertexmode) {
-	case GL_POLYGON:	
-		// clip normalized vertices
-		vertices = clipper(vertices);
-		// transform into screen coords
-		vertices = matrix_viewport * vertices;
+}
+
+/*
+ * This routine will initiate the processing and drawing of a polygon.
+ */
+void myFlush() {
+	vector< vector<Matrix> >::iterator iter;
+	for(iter=displaylist.begin();iter!=displaylist.end();iter++) {
 		// draw polygon
-		drawPolygon(vertices);
-		break;
+		drawPolygon(*iter);
+
 	}
-	return;
+	displaylist.clear();
 }
 
 
