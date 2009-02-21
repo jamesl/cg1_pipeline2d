@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <vector>
+#include "color.h"
 
 using namespace std;
 
@@ -21,10 +22,14 @@ class Matrix {
 	int getRows() const;
 	int getCols() const;
 	void clear();
+	void setvertexinfo(color c);
 
   private:
 	int _rows,_cols,_size;
 	double *_data;
+
+	bool isVertex;
+	color _c;
 };
 
 ostream& operator<<(ostream& os, const Matrix &m);

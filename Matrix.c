@@ -178,4 +178,8 @@ Matrix  Matrix::operator* (const Matrix& m) {
 	return result;
 }
 
+void Matrix::setvertexinfo(color c) {
+	_c = c;
+	isVertex = true;
+}
 

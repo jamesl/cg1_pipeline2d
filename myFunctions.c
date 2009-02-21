@@ -109,6 +109,7 @@ void myVertex3f(float x,float y,float z) {
 	pt(1,0) = y;
 	pt(2,0) = z;
 	pt(3,0) = 1.0;
+	//pt.setvertexinfo( getcolor() );
 	// multiply each point by normalize
 	// and modelview upon insertion into
 	// list

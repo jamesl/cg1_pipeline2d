@@ -6,7 +6,7 @@ CFLAGS=-ggdb
 
 LDFLAGS=-lglut -lGL -lm
 
-all: main test
+all: clean main test
 
 main: myFunctions.o Matrix.o color.o setPixel.o drawPolygon.o clipPolygon.o
 
