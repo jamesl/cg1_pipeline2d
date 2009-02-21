@@ -10,8 +10,8 @@ color clearcolor;
  * code from assignment 2 without changing
  * setPixel calls
  */
-void setPixel(int x,int y) {
-	setPixel(x,y,currentcolor.r,currentcolor.g,currentcolor.b);
+void setPixel(int x,int y,color c) {
+	setPixel(x,y,c.r,c.g,c.b);
 }
 
 /**

@@ -16,18 +16,18 @@ enum clip_plane {
 // clipping algorithm
 class Point {
   public:
+	Matrix m;
 	double x,y;
 	
 	// construct a point given 2 coordinates
-	Point(double _x, double _y) : x(_x), y(_y) { }
+	//Point(double _x, double _y) : x(_x), y(_y) { }
 	// in the 2d pipeline, we are using a 4x1 matrix
 	// to represent a vertex, so it is easier to construct
 	// from a Matrix
-	Point(Matrix a) : x(a(0,0)), y(a(1,0)) { }
+	Point(Matrix a) : x(a(0,0)), y(a(1,0)), m(a) { }
 
 	// create a Matrix representation of this point
 	Matrix matrix() {
-		Matrix m(4,1);	
 		m(0,0) = x;
 		m(1,0) = y;
 		m(2,0) = 1;
@@ -53,7 +53,7 @@ class Point {
 	// outside the clip region, and point r is within the clip
 	// region. 
 	Point moveIn(Point r,enum clip_plane clip) {
-		Point q(x,y);
+		Point q(matrix());
 		bool vert = (x == r.x);
 		float m;
 		if(!vert) m = (y - r.y) / (x - r.x);

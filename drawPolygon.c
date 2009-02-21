@@ -43,6 +43,7 @@ bool cmpbucketptr(Bucket *a, Bucket *b) {
 // draw a polygon!
 void drawPolygon(vector<Matrix> vertex) {
 	int n = vertex.size();
+	color c = vertex[0].getcolor();
 	Bucket *edgetable[SCR_HEIGHT];
 	for(int i=0;i<SCR_HEIGHT;i++) 
 		edgetable[i] = 0; 
@@ -128,7 +129,7 @@ void drawPolygon(vector<Matrix> vertex) {
 				draw = !draw; iter++; 
 			}
 			if(y >= 0 && y <SCR_HEIGHT)
-				if(draw) setPixel(x,y);
+				if(draw) setPixel(x,y,c);
 		}	
 		for(iter = aet.begin();iter!=aet.end();iter++) {
 			(*iter)->x += (*iter)->xinc;

@@ -1,4 +1,7 @@
 // C++ Matrices (or at least enough for CG1)
+// also used for vertices (with additional info)
+// which is bad design, but was done due to lack
+// of time
 
 #include "Matrix.h"
 #ifndef NODEBUG
@@ -14,7 +17,7 @@ using namespace std;
  * default constructor
  * make a 4x4 matrix
  */
-Matrix::Matrix() : _rows(4), _cols(4), _size(16) {
+Matrix::Matrix() : _rows(4), _cols(4), _size(16), isVertex(false) {
 	_data = new double[16];
 	assert(_size<=16);
 	clear();
@@ -28,7 +31,7 @@ Matrix::Matrix() : _rows(4), _cols(4), _size(16) {
  * rows and columns
  */
 Matrix::Matrix(int rows,int cols) :
-		_rows(rows), _cols(cols), _size(rows*cols) {
+		_rows(rows), _cols(cols), _size(rows*cols), isVertex(false) {
 	assert(_size<=16);
 	assert(_cols > 0 && _cols <= 4);
 	assert(_rows > 0 && _rows <= 4);
@@ -110,6 +113,8 @@ Matrix::Matrix(const Matrix& m) {
 	_rows = m._rows;
 	_cols = m._cols;
 	_size = m._size;
+	isVertex = m.isVertex;
+	_c = m._c;
 	assert(_size<=16);
 	assert(_cols > 0 && _cols <= 4);
 	assert(_rows > 0 && _rows <= 4);
@@ -165,6 +170,8 @@ vector<Matrix>  Matrix::operator* (const vector<Matrix>& v) {
 Matrix  Matrix::operator* (const Matrix& m) {
 	assert(_cols == m.getRows());
 	Matrix result(_rows,m._cols);
+	result.isVertex = m.isVertex;
+	result._c = m._c;
 	for(int i=0;i<_rows;i++) {
 		for(int j=0;j<m._cols;j++) {
 			double sum=0;
@@ -181,5 +188,10 @@ Matrix  Matrix::operator* (const Matrix& m) {
 void Matrix::setvertexinfo(color c) {
 	_c = c;
 	isVertex = true;
+}
+
+color Matrix::getcolor() {
+	assert(isVertex);
+	return _c;
 }
 

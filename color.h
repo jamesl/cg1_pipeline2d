@@ -13,5 +13,5 @@ color getclearcolor();
 void setcolor(float,float,float);
 void setclearcolor(float,float,float);
 
-void setPixel(int,int);
+void setPixel(int,int,color c);
 #endif

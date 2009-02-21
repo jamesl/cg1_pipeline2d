@@ -23,6 +23,7 @@ class Matrix {
 	int getCols() const;
 	void clear();
 	void setvertexinfo(color c);
+	color getcolor();
 
   private:
 	int _rows,_cols,_size;
