@@ -12,7 +12,7 @@ class Matrix {
 	double& operator() (int row, int col);
 	double	operator() (int row, int col) const;	
 
-	~Matrix();
+	virtual ~Matrix();
 	Matrix(const Matrix& m);
 	Matrix& operator= (const Matrix& m);
 	Matrix  operator* (const Matrix& m);
