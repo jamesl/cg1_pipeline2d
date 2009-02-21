@@ -38,6 +38,7 @@ Matrix *currentmatrix = &matrix_modelview;
 
 stack<Matrix> matrixstack;
 vector<Matrix> vertices;
+vector< vector<Matrix> > displaylist;
 GLenum vertexmode;
 
 /**
@@ -72,8 +73,8 @@ void myBegin(GLenum mode) {
  *
  * This routine will initiate the processing and drawing of a polygon.
  */
-void myEnd()
-{
+void myEnd() {
+	displaylist.push_back(vertices);
 	switch(vertexmode) {
 	case GL_POLYGON:	
 		// clip normalized vertices
@@ -93,12 +94,15 @@ void myEnd()
  *
  * x,y -- Specify x and y coordinates of a vertex.
  */
-void myVertex2f(float x, float y)
-{
+void myVertex2f(float x, float y) {
+	myVertex3f(x,y,0.0);
+}
+
+void myVertex3f(float x,float y,float z) {
 	Matrix pt(4,1);
 	pt(0,0) = x;
 	pt(1,0) = y;
-	pt(2,0) = 0.0;
+	pt(2,0) = z;
 	pt(3,0) = 1.0;
 	// multiply each point by normalize
 	// and modelview upon insertion into
@@ -106,7 +110,6 @@ void myVertex2f(float x, float y)
 	pt = 	matrix_normalize * 
 		matrix_modelview * pt;
 	vertices.push_back(pt);
-	
 }
 
 
@@ -155,15 +158,15 @@ void myClearColor(	float  	red,
  */
 void myClear(GLbitfield mask)
 {
-	color c;
 	switch(mask) {
 	case GL_COLOR_BUFFER_BIT:
+		color c;
 		c = getclearcolor();
+		for(int x=0;x<screenWidth;x++)
+			for(int y=0;y<screenHeight;y++)
+				setPixel(x,y,c.r,c.g,c.b);
 		break;
 	}
-	for(int x=0;x<screenWidth;x++)
-		for(int y=0;y<screenHeight;y++)
-			setPixel(x,y,c.r,c.g,c.b);
 }
 
 /**
@@ -238,13 +241,16 @@ void myLoadIdentity( void)
  * transformation (MODELVIEW) matrix.
  */
 void myTranslatef(float x, float y) {
+	myTranslatef(x,y,0.0);
+}
+void myTranslatef(float x, float y, float z) {
 	myMatrixMode(GL_MODELVIEW);
 	Matrix translate;
 	translate(0,0) = translate(1,1) = 1.0;
 	translate(2,2) = translate(3,3) = 1.0;
 	translate(0,3) = x;
 	translate(1,3) = y;
-	translate(2,3) = 1.0;
+	translate(2,3) = z;
 	(*currentmatrix) = (*currentmatrix) * translate;
 }
 
@@ -261,14 +267,39 @@ void myTranslatef(float x, float y) {
  * transformation (MODELVIEW) matrix.
  */
 void myRotatef(float degrees) {
+	myRotatef(degrees,Z_AXIS);
+}
+
+void myRotatef(float degrees,int axis) {
 	myMatrixMode (GL_MODELVIEW);
 	Matrix rotate;
 	// GL uses degrees, but math.h uses radians!
 	double angle = degrees * 3.14159 / 180.0;
-	rotate(2,2) = rotate(3,3) = 1.0;
-	rotate(0,0) = rotate(1,1) = cos(angle);
-	rotate(0,1) = -sin(angle);
-	rotate(1,0) = sin(angle);
+	double sint = sin(angle), cost = cos(angle);
+	rotate(0,0) = 1.0;
+	rotate(1,1) = 1.0;
+	rotate(2,2) = 1.0;
+	rotate(3,3) = 1.0;
+	switch(axis) {
+	case X_AXIS:
+		rotate(1,1) = cost;
+		rotate(1,2) = -sint;
+		rotate(2,1) = sint;
+		rotate(2,2) = cost;
+		break;
+	case Y_AXIS:
+		rotate(0,0) = cost;
+		rotate(0,2) = sint;
+		rotate(2,0) = -sint;
+		rotate(2,2) = cost;	
+		break;
+	case Z_AXIS:
+		rotate(0,0) = cost;
+		rotate(0,1) = -sint;
+		rotate(1,0) = sint;
+		rotate(1,1) = cost;	
+		break;
+	}
 	(*currentmatrix) = (*currentmatrix) * rotate;
 }
 
@@ -284,11 +315,16 @@ void myRotatef(float degrees) {
  *
  */
 void myScalef(float x, float y) {
+	myScalef(x,y,1.0);
+}
+
+void myScalef(float x, float y, float z) {
 	myMatrixMode(GL_MODELVIEW);
 	Matrix scale;
 	scale(0,0) = x;
 	scale(1,1) = y;
-	scale(2,2) = scale(3,3) = 1.0;
+	scale(2,2) = z;
+	scale(3,3) = 1.0;
 	(*currentmatrix) = (*currentmatrix) * scale;
 }
 

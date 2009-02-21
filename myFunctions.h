@@ -9,11 +9,22 @@
  *
  */
 
-#ifdef __APPLE__
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
+#ifdef WIN32
+#include <windows.h>
 #endif
+
+#ifdef __APPLE__
+#include <OPENGL/gl.h>
+#include <OPENGL/glu.h>
+#else
+#include <GL/gl.h>
+#include <GL/glu.h>
+#endif
+
+#define X_AXIS 0
+#define Y_AXIS 1
+#define Z_AXIS 2
+
 
 /*
  * Defining polygons
@@ -21,6 +32,7 @@
 extern void myBegin(GLenum mode);
 extern void myEnd();
 extern void myVertex2f(float x, float y);
+extern void myVertex3f(float x, float y, float z);
 extern void myColor3f(	float red, float green, float blue);
 extern void myClearColor(	float red, float green, float blue, float alpha);
 extern void myClear(GLbitfield mask);
@@ -30,8 +42,11 @@ extern void myClear(GLbitfield mask);
  */
 extern void myLoadIdentity( void);
 extern void myTranslatef(float x, float y);
+extern void myTranslatef(float x, float y, float z);
 extern void myRotatef(	float angle);
+extern void myRotatef(	float angle, int axis);
 extern void myScalef(float x, float y);
+extern void myScalef(float x, float y, float z);
 
 
 /*
