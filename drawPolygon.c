@@ -6,6 +6,8 @@
 #include <algorithm>
 #include "Matrix.h"
 #include "color.h"
+#include "zbuffer.h"
+#include "math.h"
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
 #else
@@ -20,15 +22,24 @@ extern int screenWidth;
 // the same buckets as in class
 class Bucket {
   public:
-	Bucket(int _ymax, float _x, float _xinc) :
-		ymax(_ymax), x(_x), xinc(_xinc), next(0) {
+	Bucket(int _ymax, float _x, float _xinc, 
+	       float _z, float _dzdx, float _dzdy) :
+			ymax(_ymax), x(_x), xinc(_xinc), next(0),
+			z(_z), dzdx(_dzdx), dzdy(_dzdy), oldz(_z) {
+		cerr << z << endl;
 	}
 
-
 	int ymax;
-	// yuck, floating point
 	float x;
 	float xinc;
+
+	float z;
+	float oldz;
+	float dzdx,dzdy;	
+
+	color c;
+	color dc;
+	
 	Bucket *next;
 
 }; 
@@ -43,21 +54,26 @@ bool cmpbucketptr(Bucket *a, Bucket *b) {
 // draw a polygon!
 void drawPolygon(vector<Matrix> vertex) {
 	int n = vertex.size();
+	assert(n>0);
+	assert(&vertex[0] != 0);
 	color c = vertex[0].getcolor();
 	Bucket *edgetable[SCR_HEIGHT];
 	for(int i=0;i<SCR_HEIGHT;i++) 
 		edgetable[i] = 0; 
 	// fill ET
-	int y0,y1,x0,x1;
+	int y0,y1,x0,x1,z0,z1;
 	for(int i=0;i<n;i++) {
 		y0 = vertex[i](1,0);
 		y1 = vertex[(i+1)%n](1,0);
 		x0 = vertex[i](0,0);
 		x1 = vertex[(i+1)%n](0,0);
+		z0 = vertex[i](2,0);
+		z1 = vertex[(i+1)%n](2,0);
 		if(y1 < y0) { // swap points
 			int swap;	
 			swap = y0; y0 = y1; y1 = swap;	
 			swap = x0; x0 = x1; x1 = swap;	
+			swap = z0; z0 = z1; z1 = swap;
 		}
 		
 		// toss out horizontal edges
@@ -65,7 +81,9 @@ void drawPolygon(vector<Matrix> vertex) {
 		
 		// make a bucket for current edge
 		Bucket *edge = new Bucket(
-			y1,x0,(float)(x1-x0)/(float)(y1-y0));
+			y1,x0,(float)(x1-x0)/(float)(y1-y0),z0,
+			      (float)(z1-z0)/(float)(x1-x0),
+			      (float)(z1-z0)/(float)(y1-y0));
 		if(y0 < 0 || y0 >= screenHeight) {
 			// now that this code is working,
 			// we should never get here.
@@ -121,6 +139,7 @@ void drawPolygon(vector<Matrix> vertex) {
 		}
 		sort(aet.begin(), aet.end(), cmpbucketptr);
 		vector<Bucket *>::iterator iter = aet.begin();
+		vector<Bucket *>::iterator iter2 = aet.begin();
 		bool draw = false;
 		for(int x=0;x<SCR_WIDTH;x++) {
 			while(iter != aet.end() && 
@@ -128,11 +147,22 @@ void drawPolygon(vector<Matrix> vertex) {
 			      int((*iter)->x) == x) { 
 				draw = !draw; iter++; 
 			}
-			if(y >= 0 && y <SCR_HEIGHT)
-				if(draw) setPixel(x,y,c);
+			if(y >= 0 && y <SCR_HEIGHT) {
+				if(draw) { 
+					//if((*iter)->z<depth[x][y]) {
+						depth[x][y] = (*iter)->z;
+						setPixel(x,y,c);
+					//}
+				}
+			}
+			for(iter2 = aet.begin();iter2!=aet.end();iter2++) {
+				(*iter2)->z += (*iter2)->dzdx;
+			}
 		}	
 		for(iter = aet.begin();iter!=aet.end();iter++) {
 			(*iter)->x += (*iter)->xinc;
+			(*iter)->oldz += (*iter)->dzdy;
+			(*iter)->z = (*iter)->oldz;
 		}
 	}
 }

@@ -6,13 +6,14 @@ CFLAGS=-ggdb
 
 LDFLAGS=-lglut -lGL -lm
 
-all: clean main test
+all: clean main main3d
 
-main: myFunctions.o Matrix.o color.o setPixel.o drawPolygon.o clipPolygon.o
+main: myFunctions.o Matrix.o color.o setPixel.o drawPolygon.o clipPolygon.o zbuffer.o
+main3d: myFunctions.o Matrix.o color.o setPixel.o drawPolygon.o clipPolygon.o zbuffer.o
 
 test: myFunctions.o Matrix.o color.o setPixel.o drawPolygon.o clipPolygon.o 
 
-myFunctions.o: drawPolygon.o Matrix.o color.o drawLine.o
+myFunctions.o: drawPolygon.o Matrix.o color.o drawLine.o zbuffer.o
 
 color.o: setPixel.o
 

@@ -22,6 +22,8 @@
 #include "color.h"
 #include "myFunctions.h"
 #include "setPixel.h"
+#include "zbuffer.h"
+#include "pt3.h"
 
 void drawPolygon(vector<Matrix>);
 vector<Matrix> clipper(vector<Matrix>);
@@ -77,7 +79,10 @@ void myEnd() {
 	vertices = clipper(vertices);
 	// transform into screen coords
 	vertices = matrix_viewport * vertices;
-	displaylist.push_back(vertices);
+	
+	// add to display list
+	if(vertices.size() > 0)
+		displaylist.push_back(vertices);
 }
 
 /*
@@ -88,7 +93,6 @@ void myFlush() {
 	for(iter=displaylist.begin();iter!=displaylist.end();iter++) {
 		// draw polygon
 		drawPolygon(*iter);
-
 	}
 	displaylist.clear();
 }
@@ -110,11 +114,25 @@ void myVertex3f(float x,float y,float z) {
 	pt(2,0) = z;
 	pt(3,0) = 1.0;
 	pt.setvertexinfo( getcolor() );
+	cout << "VERTEX: " << pt;
 	// multiply each point by normalize
 	// and modelview upon insertion into
 	// list
-	pt = 	matrix_normalize * 
-		matrix_modelview * pt;
+	pt = 	matrix_modelview * pt;
+	cout << "* MODELVIEW " << pt;
+	// perform projection transformation
+	pt = 	matrix_projection * pt;
+	cout << "* PROJECTION " << pt;
+	// homogeneous divide
+	float w = pt(3,0);
+	cout << " homogeneous w = " << w << endl;
+	if(w != 0) {
+		pt(0,0) = pt(0,0) / w;
+		pt(1,0) = pt(1,0) / w;
+		pt(2,0) = pt(2,0) / w;
+		pt(3,0) = pt(3,0) / w;
+	}
+	cout << "/ HOMOGENEOUS w" << pt;
 	vertices.push_back(pt);
 }
 
@@ -164,14 +182,17 @@ void myClearColor(	float  	red,
  */
 void myClear(GLbitfield mask)
 {
-	switch(mask) {
-	case GL_COLOR_BUFFER_BIT:
+	if(mask & GL_COLOR_BUFFER_BIT) {
 		color c;
 		c = getclearcolor();
 		for(int x=0;x<screenWidth;x++)
 			for(int y=0;y<screenHeight;y++)
 				setPixel(x,y,c.r,c.g,c.b);
-		break;
+	}
+	if(mask & GL_DEPTH_BUFFER_BIT) {
+		for(int x=0;x<screenWidth;x++)
+			for(int y=0;y<screenHeight;y++)
+				depth[x][y] = INF;
 	}
 }
 
@@ -345,12 +366,7 @@ void myScalef(float x, float y, float z) {
  */
 void myOrtho2D(	double left, double right, double bottom, double top)
 {
-	// create matrix to normalize coords
-	matrix_normalize(0,0) = 2.0/(right-left);
-	matrix_normalize(1,1) = 2.0/(top-bottom);
-	matrix_normalize(0,3) = -(right+left)/(right-left);
-	matrix_normalize(1,3) = -(top+bottom)/(top-bottom);
-
+	myOrtho(left,right,bottom,top,1.0,-1.0);
 }
 
 
@@ -365,8 +381,145 @@ void myViewport(int x, int y, int width, int height)
 {
 	// create matrix to take normalized coords
 	// to screen coords
+	//
+	currentmatrix = &matrix_viewport;
+	myLoadIdentityCurrent();
+	myMatrixMode(GL_MODELVIEW);
 	matrix_viewport(0,0) = (width)/2.0;
 	matrix_viewport(1,1) = (height)/2.0;
 	matrix_viewport(0,3) = ((x+width)+x)/2.0;
 	matrix_viewport(1,3) = ((y+height)+y)/2.0;
+	matrix_viewport(2,2) = .5;
+	matrix_viewport(2,3) = .5;
 }
+
+
+/**
+ * myOrtho -  define a 2D orthographic projection matrix
+ *
+ * left, right - Specify the coordinates for the left and right vertical clipping 
+ * planes.
+ * 
+ * bottom, top - Specify the coordinates for the bottom and top horizontal clipping planes.
+ *
+ * nr, fr - Specify the coords for the near and far clipping planes.
+ *
+ */
+void myOrtho(	double left, double right, double bottom, double top, double nr, double fr)
+{
+	myMatrixMode( GL_PROJECTION );
+	myLoadIdentityCurrent( );
+
+	// create matrix to normalize coords
+	matrix_projection(0,0) = 2.0/(right-left);
+	matrix_projection(1,1) = 2.0/(top-bottom);
+	matrix_projection(2,2) = 2.0/(fr-nr);
+	matrix_projection(0,3) = -(right+left)/(right-left);
+	matrix_projection(1,3) = -(top+bottom)/(top-bottom);
+	matrix_projection(2,3) = -(fr+nr)/(fr-nr);
+
+}
+
+/**
+ * myFrustrum -  define a perspective projection matrix
+ *
+ * left, right - Specify the coordinates for the left and right vertical clipping 
+ * planes.
+ * 
+ * bottom, top - Specify the coordinates for the bottom and top horizontal clipping planes.
+ *
+ * nr, fr - Specify the coords for the near and far clipping planes.
+ *
+ */
+void myFrustum(	double left, double right, double bottom, double top, double nr, double fr)
+{
+	myMatrixMode( GL_PROJECTION );
+	myLoadIdentityCurrent();
+
+	Matrix frustum;
+	frustum(0,0) = (2.0*nr)/(right-left);
+	frustum(1,1) = (2.0*nr)/(top-bottom);
+	frustum(2,2) = -(fr+nr)/(fr-nr);
+	frustum(0,2) = (right+left)/(right-left);
+	frustum(1,2) = (top+bottom)/(top-bottom);
+	frustum(2,3) = -(2.0*fr*nr)/(fr-nr);
+	frustum(3,2) = -1.0;
+	frustum(3,3) = 0.0;
+
+	matrix_projection = matrix_projection * frustum;
+
+}
+
+
+/**
+ * myLookat - define a viewing transformation
+ *
+ * eyeX, eyeY, eyez - Specifies the	position of the	eye point.
+ *
+ * centerX, centerY, centerZ - Specifies the position of the reference point.
+ *
+ * upX, upY, upz - Specifies the direction of the up vector.
+ */
+void myLookAt(  double eyeX,
+		double eyeY,
+		double eyeZ,
+		double centerX,
+		double centerY,
+		double centerZ,
+		double upX,
+		double upY,
+		double upZ ) {
+
+	myMatrixMode (GL_MODELVIEW);
+	myLoadIdentity( );
+	pt3 u,v,n;
+	pt3 eye,center,up;
+
+	eye[0] = eyeX;
+	eye[1] = eyeY;
+	eye[2] = eyeZ;
+
+	center[0] = centerX;
+	center[1] = centerY;
+	center[2] = centerZ;
+
+	up[0] = upX;
+	up[1] = upY;
+	up[2] = upZ;
+
+	pt3_vector_op(n,center,-,eye);
+	normalize(n);
+	pt3_cross(u,n,up);
+	normalize(u);
+	pt3_cross(v,u,n);
+
+	Matrix camera;	
+
+	camera(0,0) = u[0];
+	camera(1,0) = u[1];
+	camera(2,0) = u[2];
+
+	camera(0,1) = v[0];
+	camera(1,1) = v[1];
+	camera(2,1) = v[2];
+
+	camera(0,2) = -n[0];
+	camera(1,2) = -n[1];
+	camera(2,2) = -n[2];
+
+	camera(0,3) = -eye[0];
+	camera(1,3) = -eye[1];
+	camera(2,3) = -eye[2];
+
+	camera(3,0) = 0.0;
+	camera(3,1) = 0.0;
+	camera(3,2) = 0.0;
+	camera(3,3) = 1.0;
+
+	cout << camera << endl;
+
+	matrix_modelview = matrix_modelview * camera;
+
+
+}
+

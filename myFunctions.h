@@ -56,6 +56,14 @@ extern void myScalef(float x, float y, float z);
 extern void myOrtho2D(	double left, double right, double bottom, double top);
 
 /*
+ * viewing
+ */
+extern void myFrustum(double left, double right, double bottom, double top, double near, double far);
+extern void myOrtho(double left, double right, double bottom, double top, double near, double far);
+extern void myLookAt( double eyeX, double eyeY, double eyeZ, double centerX, double centerY, double centerZ,double upX, double upY,double upZ );
+
+
+/*
  * Projection / viewport
  */
 extern void myViewport(int x, int y, int width, int height);
